@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cdvCardOwnerHistory"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        app:cardElevation="1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/imgAvatarOwnerHistory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/avatar_example" />
+
+            <TextView
+                android:id="@+id/lblTitleCardOwnerHistory"
+                style="@style/LabelProfileMenuExtra"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="16dp"
+                android:maxLines="2"
+                android:text="Ricardo Augusto Severo"
+                android:textColor="@color/colorDark00"
+                app:layout_constraintBottom_toBottomOf="@+id/imgAvatarOwnerHistory"
+                app:layout_constraintEnd_toStartOf="@+id/lblLinkOwnerHistory"
+                app:layout_constraintStart_toEndOf="@+id/imgAvatarOwnerHistory"
+                app:layout_constraintTop_toTopOf="@+id/imgAvatarOwnerHistory" />
+
+            <TextView
+                android:id="@+id/lblSubTitleCardOwnerHistory"
+                style="@style/LabelProfileMenuSubItem"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:maxLines="2"
+                android:text="Ricardo Augusto Severo"
+                android:textColor="@color/colorDark03"
+                android:textStyle="normal"
+                app:layout_constraintEnd_toStartOf="@+id/lblLinkOwnerHistory"
+                app:layout_constraintStart_toEndOf="@+id/imgAvatarOwnerHistory"
+                app:layout_constraintTop_toBottomOf="@+id/lblTitleCardOwnerHistory" />
+
+            <TextView
+                android:id="@+id/lblLinkOwnerHistory"
+                style="@style/LabelLinks"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                android:text="AVALIAR"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/lblLink2OwnerHistory"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/lblLink2OwnerHistory"
+                style="@style/LabelLinks"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                android:gravity="center|center_vertical"
+                android:lines="2"
+                android:text="CONTRATAR\nNOVAMENTE"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

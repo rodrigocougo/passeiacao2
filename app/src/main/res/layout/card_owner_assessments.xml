@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cdvAssessments"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        app:cardElevation="1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/imgAvatarAssessments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/avatar_example" />
+
+            <TextView
+                android:id="@+id/lblTitleCardAssessments"
+                style="@style/LabelProfileMenuExtra"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="16dp"
+                android:text="Ricardo Augusto Severo"
+                android:textColor="@color/colorDark00"
+                app:layout_constraintBottom_toBottomOf="@+id/imgAvatarAssessments"
+                app:layout_constraintEnd_toStartOf="@+id/lblDateAssessments"
+                app:layout_constraintStart_toEndOf="@+id/imgAvatarAssessments"
+                app:layout_constraintTop_toTopOf="@+id/imgAvatarAssessments" />
+
+            <TextView
+                android:id="@+id/lblDateAssessments"
+                style="@style/LabelProfileMenuSubItem"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                android:text="4/10/2019"
+                android:textColor="@color/colorDark03"
+                android:textStyle="normal"
+                app:layout_constraintBottom_toBottomOf="@+id/lblTitleCardAssessments"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/lblTitleCardAssessments" />
+
+            <RatingBar
+                android:id="@+id/rtbProfileAssessment"
+                style="@style/Widget.AppCompat.RatingBar.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:isIndicator="false"
+                android:max="1"
+                android:numStars="5"
+                android:rating="1.5"
+                android:stepSize="1"
+                android:theme="@style/RatingBar"
+                android:visibility="visible"
+                app:layout_constraintStart_toStartOf="@+id/lblTitleCardAssessments"
+                app:layout_constraintTop_toBottomOf="@+id/lblTitleCardAssessments" />
+
+            <TextView
+                android:id="@+id/lblCommentsItem"
+                style="@style/LabelProfileMenuExtra"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginBottom="16dp"
+                android:gravity="top|left"
+                android:inputType="textMultiLine"
+                android:lines="4"
+                android:maxLines="2"
+                android:scrollbars="vertical"
+                android:text="The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32"
+                android:textColor="@color/colorDark00"
+                android:textSize="14dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/lblTitleCardAssessments"
+                app:layout_constraintTop_toBottomOf="@+id/rtbProfileAssessment" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

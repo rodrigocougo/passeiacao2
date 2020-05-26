@@ -1,0 +1,71 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "br.fatec.tcc.passeiacao"
+        minSdkVersion 15
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        lintOptions {
+            checkReleaseBuilds false
+            abortOnError false
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //noinspection GradleCompatible
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+
+    // Firebase - Adicionado para funcionamento do Firebase
+    implementation 'com.google.firebase:firebase-core:16.0.7'
+
+    // Firebase - Adicionado para usar o recurso Realtime Database
+    implementation 'com.google.firebase:firebase-database:16.0.1'
+    implementation 'com.google.firebase:firebase-core:16.0.9'
+    implementation 'com.google.firebase:firebase-storage:16.0.1'
+
+    // Biblioteca do MaskFormatter
+    implementation 'com.github.rtoshiro.mflibrary:mflibrary:1.0.0'
+
+
+    implementation 'com.google.firebase:firebase-database:16.1.0'
+
+
+    // Para fazer login com o Facebook
+    implementation 'com.google.firebase:firebase-auth:16.1.0'
+    implementation 'com.facebook.android:facebook-login:[5,6)'
+
+    //androidX
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation "androidx.cardview:cardview:1.0.0"
+    implementation "androidx.gridlayout:gridlayout:1.0.0"
+    implementation "androidx.mediarouter:mediarouter:1.1.0"
+    implementation 'androidx.palette:palette:1.0.0'
+    implementation "androidx.preference:preference:1.1.0"
+
+    implementation 'com.google.android.material:material:1.1.0-alpha10'
+    implementation 'androidx.room:room-runtime:2.2.5'
+    annotationProcessor 'androidx.room:room-compiler:2.2.5'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+
+    implementation 'com.facebook.fresco:fresco:2.2.0'
+
+}
+// Firebase - Adicionado para funcionamento do Firebase
+apply plugin: 'com.google.gms.google-services'

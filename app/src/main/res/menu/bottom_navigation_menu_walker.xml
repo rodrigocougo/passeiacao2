@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/navigation_search"
+        app:showAsAction="always"
+        android:title="@string/title_bottom_navigation_search_walkers"
+        android:icon="@drawable/icon_search"/>
+
+    <item
+        android:id="@+id/navigation_dog_list"
+        app:showAsAction="always"
+        android:title="@string/title_bottom_navigation_dog_list"
+        android:icon="@drawable/icon_dog"/>
+
+    <item
+        android:id="@+id/navigation_scheduled"
+        app:showAsAction="always"
+        android:title="@string/title_bottom_navigation_scheduled"
+        android:icon="@drawable/icon_schedule"/>
+
+    <item
+        android:id="@+id/navigation_historical"
+        app:showAsAction="always"
+        android:title="@string/title_bottom_navigation_historical"
+        android:icon="@drawable/icon_history"/>
+</menu>

@@ -1,0 +1,74 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Base application theme. Theme.AppCompat.Light.DarkActionBar -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColor">@color/colorDark02</item>
+    </style>
+
+    <!--Estilos WBS - TOOLBAR GERAL-->
+    <style name="GeneralToolbar" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:background">@color/colorPrimaryLight</item>
+    </style>
+
+    <!--RatingBar Geral-->
+    <style name="RatingBar" parent="Theme.AppCompat">
+        <item name="colorControlNormal">@color/colorDark03</item>
+        <item name="colorControlActivated">@color/colorPrimary</item>
+    </style>
+
+    <style name="LabelProfileMenu">
+        <item name="android:lines">1</item>
+        <item name="android:textColor">@color/colorLabelTitles</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily" tools:targetApi="jelly_bean">@font/roboto_regular</item>
+    </style>
+
+    <style name="LabelProfileMenuSubItem">
+        <item name="android:lines">1</item>
+        <item name="android:textColor">@color/colorLabelTitles</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily" tools:targetApi="jelly_bean">@font/roboto_regular</item>
+    </style>
+
+    <style name="LabelProfileMenuExtra">
+        <item name="android:lines">1</item>
+        <item name="android:textColor">@color/colorLabelSubTitles</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily" tools:targetApi="jelly_bean">@font/roboto_regular</item>
+    </style>
+
+    <style name="LabelNoteProfile">
+        <item name="android:lines">1</item>
+        <item name="android:textColor">@color/colorLink</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily" tools:targetApi="jelly_bean">@font/roboto_regular</item>
+    </style>
+
+    <style name="LabelLinks">
+        <item name="android:lines">1</item>
+        <item name="android:textColor">@color/colorLink</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily" tools:targetApi="jelly_bean">@font/roboto_regular</item>
+    </style>
+
+    <style name="LabelHighlighter">
+        <item name="android:lines">2</item>
+        <item name="android:textColor">@color/colorHighlighter</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:fontFamily" tools:targetApi="jelly_bean">@font/roboto_regular</item>
+    </style>
+
+    <style name="Toolbar.Stiled" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+</resources>

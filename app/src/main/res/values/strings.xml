@@ -1,0 +1,57 @@
+<resources>
+    <string name="app_name">PasseiaCao</string>
+    <string name="e_mail">E-mail</string>
+    <string name="entrar">ENTRAR</string>
+    <string name="senha">Senha</string>
+    <string name="cadastrar">Cadastrar</string>
+    <string name="esqueci_minha_senha">Esqueci minha senha</string>
+    <string name="imagem_de_fundo">imagem de fundo</string>
+    <string name="tela_de_cadastro">Novo Dono</string>
+    <string name="botao_cadastrar">Cadastrar</string>
+    <string name="facebook_app_id">340627666623048</string> <string name="fb_login_protocol_scheme">fb340627666623048</string>
+
+    <string-array name="arr_sexo">
+        <item>--</item>
+        <item>Masculino</item>
+        <item>Feminino</item>
+    </string-array>
+
+    <string-array name="arr_breed">
+        <item>--</item>
+        <item>Raça 1</item>
+        <item>Raça 2</item>
+    </string-array>
+
+    <string-array name="arr_castrated">
+        <item>--</item>
+        <item>Sim</item>
+        <item>Não</item>
+    </string-array>
+
+    <string-array name="arr_type">
+        <item>--</item>
+        <item>Serei apenas o dono</item>
+        <item>Serei apenas o passeador</item>
+        <item>Serei dono e passeador</item>
+    </string-array>
+
+    <!--Cadastro de usuarios-->
+    <string name="hint_nome">Nome</string>
+
+    <!--Menus-->
+    <string name="action_settings">Editar meu perfil</string>
+    <string name="action_assessments">Minhas avaliações</string>
+    <string name="action_logoff">Deslogar</string>
+    <string name="action_settings_title">Voltar</string>
+
+    <!--BottomNavigationView-->
+    <string name="title_bottom_navigation_search_walkers">Passeadores</string>
+    <string name="title_bottom_navigation_search_owner">Donos</string>
+    <string name="title_bottom_navigation_dog_list">Cãezinhos</string>
+    <string name="title_bottom_navigation_scheduled">Agendados</string>
+    <string name="title_bottom_navigation_historical">Históricos</string>
+
+    <string name="title_bottom_navigation_owners">Interessados</string>
+    <string name="title_toolbar_profile">Perfil</string>
+
+</resources>

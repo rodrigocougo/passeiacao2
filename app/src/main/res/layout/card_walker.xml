@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cdvCardWalkerSearch"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        app:cardElevation="1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/imgAvatarWalker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/avatar_example" />
+
+            <TextView
+                android:id="@+id/lblTitleCardWalker"
+                style="@style/LabelProfileMenuExtra"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginBottom="16dp"
+                android:text="Ricardo Augusto Severo"
+                android:textColor="@color/colorDark00"
+                app:layout_constraintBottom_toBottomOf="@+id/imgAvatarWalker"
+                app:layout_constraintStart_toEndOf="@+id/imgAvatarWalker"
+                app:layout_constraintTop_toTopOf="@+id/imgAvatarWalker" />
+
+            <TextView
+                android:id="@+id/lblSubTitleCardWalker"
+                style="@style/LabelProfileMenuSubItem"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:text="Ricardo Augusto Severo"
+                android:textColor="@color/colorDark03"
+                android:textStyle="normal"
+                app:layout_constraintStart_toEndOf="@+id/imgAvatarWalker"
+                app:layout_constraintTop_toBottomOf="@+id/lblTitleCardWalker" />
+
+            <TextView
+                android:id="@+id/lblNoteWalker"
+                style="@style/LabelNoteProfile"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:text="4.7"
+                app:layout_constraintBottom_toBottomOf="@+id/imgAvatarWalker"
+                app:layout_constraintEnd_toStartOf="@+id/rtbProfileWalker"
+                app:layout_constraintTop_toTopOf="@+id/imgAvatarWalker" />
+
+            <RatingBar
+                android:id="@+id/rtbProfileWalker"
+                style="@style/Widget.AppCompat.RatingBar.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginEnd="24dp"
+                android:layout_marginRight="24dp"
+                android:isIndicator="false"
+                android:max="1"
+                android:numStars="1"
+                android:rating="1.5"
+                android:stepSize="1"
+                android:theme="@style/RatingBar"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/imgIconWalkerDogs"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/imgIconWalkerDogs"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginRight="24dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/icon_info" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
