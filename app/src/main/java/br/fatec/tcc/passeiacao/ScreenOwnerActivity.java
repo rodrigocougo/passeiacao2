@@ -2,27 +2,39 @@ package br.fatec.tcc.passeiacao;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.URLUtil;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -52,12 +64,20 @@ import br.fatec.tcc.passeiacao.owners.fragments.OwnersSearchFRG;
 import br.fatec.tcc.passeiacao.room.UserViewModel;
 import br.fatec.tcc.passeiacao.service.firebaseService;
 
+import static aplicacao.passeiacao.IS_DOGS;
+import static aplicacao.passeiacao.IS_OWNER;
+import static aplicacao.passeiacao.SET_LAT;
+import static aplicacao.passeiacao.SET_LON;
+import static com.facebook.FacebookSdk.getApplicationContext;
+
 public class ScreenOwnerActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseReference;
     private Query fbReferenceWalkers;
     private Query fbReferenceHistoricals;
+    private Query fbReferenceUserUpdate;
+    private Query fbReferenceScheduleds;
     private FirebaseAuth mAuth;
 
     private Button deslogarButton;
@@ -77,10 +97,38 @@ public class ScreenOwnerActivity extends AppCompatActivity implements BottomNavi
     private List<HistoricalModel> historicalModelList;
     private ProgressBar mProgressBar;
 
+    LocationManager mLocationManager;
+    private static final long MIN_DISTANCE_FOR_UPDATE = 10;
+    private static final long MIN_TIME_FOR_UPDATE = 1000 * 60 * 2;
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_dono);
+
+        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            /*mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_DISTANCE_FOR_UPDATE,
+                    MIN_TIME_FOR_UPDATE, mLocationListener);*/
+            //return;
+        } else {
+            int REQUEST_CODE = 0;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]
+                        {Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
+                requestPermissions(new String[]
+                        {Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CODE);
+            }
+        }
 
         //Inicializa o FireBase
         databaseReference = firebaseService.inicializaFireBase(this);
@@ -111,27 +159,6 @@ public class ScreenOwnerActivity extends AppCompatActivity implements BottomNavi
         //BadgeDrawable badge = bottomNavigationView.getOrCreateBadge(item.getItemId());
         //badge.setNumber(3);
 
-        /* ViewPager */
-        //nViewPagerOwner = findViewById(R.id.viewPagerOwner);
-        //nViewPagerOwner.beginFakeDrag();
-        //mOwnersFPA = new OwnersFPA(getSupportFragmentManager (), etapas, new ArrayList<UserModel>());
-        //nViewPagerOwner.setAdapter(mOwnersFPA);
-        /*nViewPagerOwner.setAdapter(new OwnersFPA(getSupportFragmentManager (), etapas, userWalkersModelList));
-        nViewPagerOwner.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            public void onPageScrollStateChanged(int state) {
-            }
-
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
-
-            public void onPageSelected(int position) {
-                bottomNavigationView.getMenu().getItem(position).setChecked(true);
-            }
-        });*/
-
-        /*if (savedInstanceState == null) {
-            onNavigationItemSelected(bottomNavigationView.getMenu().findItem(R.id.navigation_search));
-        }*/
 
         /***************************************************************************************/
         // Provedor Room UserModel
@@ -147,7 +174,84 @@ public class ScreenOwnerActivity extends AppCompatActivity implements BottomNavi
                 // Carrega os dados do usuario logado
                 loadProfileOwner(userModel);
                 mProgressBar.setVisibility(View.GONE);
-                openFragment(OwnersSearchFRG.newInstance(userModel.getId()), "OwnersSearch");
+                Fragment fragB = getSupportFragmentManager().findFragmentByTag("OwnersSearch");
+                if (fragB == null) {
+                    openFragment(OwnersSearchFRG.newInstance(userModel.getId()), "OwnersSearch");
+                }
+
+                if(fbReferenceUserUpdate == null) {
+                    fbReferenceScheduleds = FirebaseDatabase.getInstance().getReference().child("Scheduleds").orderByChild("id_owner").equalTo(userModel.getId());
+                    fbReferenceUserUpdate = FirebaseDatabase.getInstance().getReference().child("Usuarios").orderByChild("id").equalTo(userModel.getId());
+                    updateUserAuth();
+                    getScheduledsCalcAssessments();
+                    if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_DISTANCE_FOR_UPDATE,
+                                MIN_TIME_FOR_UPDATE, mLocationListener);
+                    }
+                }
+                getScheduledsCalcAssessments();
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(fbReferenceScheduleds != null) {
+            getScheduledsCalcAssessments();
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_DISTANCE_FOR_UPDATE,
+                    MIN_TIME_FOR_UPDATE, mLocationListener);
+        }
+    }
+
+    private void getScheduledsCalcAssessments() {
+        fbReferenceScheduleds.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                //scheduledModelList = new ArrayList<>();
+                if (dataSnapshot.exists()) {
+                    List<Integer> notes = new ArrayList<>();
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        final ScheduledModel scheduled = postSnapshot.getValue(ScheduledModel.class);
+                        if (scheduled.getAssessment_date_owner() != "") {
+                            //Calcula a nota do usuario atual;
+                            int valor = (int)scheduled.getAssessment_note_owner();
+                            if(valor > 0){
+                                notes.add(valor);
+                            }
+
+                        }
+                    }
+                    final double noteFinal = Util.getCalcNotes(notes);
+                    /*#######################################################################*/
+                    databaseReference.child("Usuarios").orderByChild("id").equalTo(userModel.getId()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                for (final DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                    UserModel userModel = dataSnapshot.getChildren().iterator().next()
+                                            .getValue(UserModel.class);
+                                    userModel.setNote(noteFinal);
+                                    snapshot.getRef().setValue(userModel);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                    /*#######################################################################*/
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), "Erro na conexão! " + databaseError,
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -169,7 +273,7 @@ public class ScreenOwnerActivity extends AppCompatActivity implements BottomNavi
                 return true;
             case R.id.navigation_dog_list:
                 mProgressBar.setVisibility(View.GONE);
-                openFragment(OwnersDogsListFRG.newInstance(userModel.getId()), "OwnersDogsList");
+                openFragment(OwnersDogsListFRG.newInstance(userModel.getId(), IS_DOGS), "OwnersDogsList");
                 return true;
             case R.id.navigation_scheduled:
                 //getScheduleds("");
@@ -215,10 +319,11 @@ public class ScreenOwnerActivity extends AppCompatActivity implements BottomNavi
                 return true;
             case R.id.action_assessments:
                 // criando um bundle para informar à nova Activity que se trata de um dono de cão
-                b.putInt("tipo", tipo);
+                b.putInt("tipo", IS_OWNER);
                 // chamando a nova Activity
                 intent = new Intent(getApplication(), AssessmentsActivity.class);
                 intent.putExtras(b);
+                intent.putExtra("id_user_auth", userModel.getId());
                 startActivity(intent);
                 return true;
             case R.id.action_logoff:
@@ -237,11 +342,18 @@ public class ScreenOwnerActivity extends AppCompatActivity implements BottomNavi
         TextView lblPerformed = findViewById(R.id.lblPerformed);
         TextView lblCanceled = findViewById(R.id.lblCanceled);
         TextView lblAge = findViewById(R.id.lblAge);
-        //ImageView imageView3 = findViewById(R.id.imageView3);
+        ImageView imgCover = findViewById(R.id.imageView2);
+        SimpleDraweeView imgAVatar = findViewById(R.id.imageView3);
+        if(URLUtil.isValidUrl(userModel.getImageAvatar())) {
+            imgAVatar.setImageURI(Uri.parse(userModel.getImageAvatar()));
+        }
+        if(URLUtil.isValidUrl(userModel.getImageCover())) {
+            imgCover.setImageURI(Uri.parse(userModel.getImageCover()));
+        }
 
         lblTitleProfile.setText(userModel.getNome());
         lblSubTitleProfile.setText(String.valueOf(userModel.getNote()));
-        rtbProfileOwner.setRating(userModel.getNoteUserConverter());
+        rtbProfileOwner.setRating((float) userModel.getNote());
         rtbProfileOwner.setIsIndicator(true);
         lblObservation.setText(userModel.getBairro());
         lblPerformed.setText(userModel.getConcluded() + " realizados");
@@ -321,28 +433,82 @@ public class ScreenOwnerActivity extends AppCompatActivity implements BottomNavi
         });
     }
 
-    private void getHistorical(String email) {
-        fbReferenceHistoricals.addValueEventListener(new ValueEventListener() {
+    private void updateUserAuth() {
+        fbReferenceUserUpdate.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    historicalModelList = new ArrayList<>();
-                    if (dataSnapshot.exists()) {
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                            HistoricalModel historical = postSnapshot.getValue(HistoricalModel.class);
-                            historicalModelList.add(historical);
-                        }
-                    }
-                    openFragment(OwnersHistoricalFRG.newInstance(""), "OwnersHistorical");
-                    mProgressBar.setVisibility(View.GONE);
+                UserModel userModelLocal = null;
+                if (dataSnapshot.exists()) {
+                    userModelLocal = dataSnapshot.getChildren().iterator().next()
+                            .getValue(UserModel.class);
+
+                    //Confirma a auth
+                    userModelLocal.setAuth(true);
+
+                    //Add os dados do usuário (faz um update do usuario)
+                    userViewModel.addUser(userModelLocal);
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Toast.makeText(getApplicationContext(), "Erro na conexão! " + databaseError,
                         Toast.LENGTH_SHORT).show();
-                openFragment(OwnersHistoricalFRG.newInstance(""), "OwnersHistorical");
-                mProgressBar.setVisibility(View.GONE);
             }
         });
     }
+
+    private void setUpdateGeoLocation(final double Lat, final double Lon) {
+        if (userModel == null) return;
+        userModel.setLongitude(Lon);
+        userModel.setLatitude(Lat);
+        if(fbReferenceUserUpdate == null) return;
+        fbReferenceUserUpdate.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                UserModel userModelLocal = null;
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        final UserModel userModel = snapshot.getValue(UserModel.class);
+                        userModel.setLatitude(Lat);
+                        userModel.setLongitude(Lon);
+                        snapshot.getRef().setValue(userModel);
+                        //Add os dados do usuário (faz um update do usuario)
+                        //userViewModel.addUser(userModelLocal);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), "Erro na conexão! " + databaseError,
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private final LocationListener mLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(final Location location) {
+            //your code here
+            SET_LON = location.getLongitude();
+            SET_LAT = location.getLatitude();
+            setUpdateGeoLocation(SET_LAT, SET_LON);
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+
+        }
+    };
 }

@@ -5,6 +5,8 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -47,11 +49,13 @@ public class UserModel {
     private String UpdateAt;
     private String RegisterUpdateAt;
     private Boolean Active;
+    private double Latitude = 0;
+    private double Longitude = 0;
 
     public UserModel() {
     }
 
-    public UserModel(String id, String nome, String email, String telefone, String sexo, String usuario, String senha, String CPF, String nasc, String cep, String numero, String endereco, String complemento, String bairro, String cidade, double note, Integer canceled, Integer concluded, String imageCover, String imageAvatar, Boolean dono, Boolean passeador, Boolean auth, String createAt, String registerCreateAt, String updateAt, String registerUpdateAt) {
+    public UserModel(String id, String nome, String email, String telefone, String sexo, String usuario, String senha, String CPF, String nasc, String cep, String numero, String endereco, String complemento, String bairro, String cidade, double note, Integer canceled, Integer concluded, String imageCover, String imageAvatar, Boolean dono, Boolean passeador, Boolean auth, String createAt, String registerCreateAt, String updateAt, String registerUpdateAt, double latitude, double longitude) {
         this.id = id;
         Nome = nome;
         Email = email;
@@ -77,6 +81,33 @@ public class UserModel {
         Auth = auth;
         CreateAt = createAt;
         RegisterCreateAt = registerCreateAt;
+        UpdateAt = updateAt;
+        RegisterUpdateAt = registerUpdateAt;
+        Latitude = latitude;
+        Longitude = longitude;
+    }
+
+    public UserModel(String id, String nome, String email, String telefone, String sexo, String usuario, String senha, String CPF, String nasc, String cep, String numero, String endereco, String complemento, String bairro, String cidade, String imageCover, String imageAvatar, Boolean dono, Boolean passeador, Boolean auth, String updateAt, String registerUpdateAt) {
+        this.id = id;
+        Nome = nome;
+        Email = email;
+        Telefone = telefone;
+        Sexo = sexo;
+        Usuario = usuario;
+        Senha = senha;
+        this.CPF = CPF;
+        Nasc = nasc;
+        Cep = cep;
+        Numero = numero;
+        Endereco = endereco;
+        Complemento = complemento;
+        Bairro = bairro;
+        Cidade = cidade;
+        ImageCover = imageCover;
+        ImageAvatar = imageAvatar;
+        Dono = dono;
+        Passeador = passeador;
+        Auth = auth;
         UpdateAt = updateAt;
         RegisterUpdateAt = registerUpdateAt;
     }
@@ -210,7 +241,8 @@ public class UserModel {
     }
 
     public double getNote() {
-        return Note;
+        BigDecimal bd = new BigDecimal(Note).setScale(1, RoundingMode.HALF_EVEN);
+        return bd.doubleValue();
     }
 
     public void setNote(double note) {
@@ -313,9 +345,25 @@ public class UserModel {
         ImageAvatar = imageAvatar;
     }
 
+    public double getLatitude() {
+        return Latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        Latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return Longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        Longitude = longitude;
+    }
+
     /*Conversões de dados*/
     public Integer getNoteUserConverter() {
-        int result = (int) Note;
+        int result = (int) getNote();
         return result;
     }
 
@@ -361,7 +409,9 @@ public class UserModel {
                 getCreateAt(),
                 getRegisterCreateAt(),
                 getUpdateAt(),
-                getRegisterUpdateAt()
+                getRegisterUpdateAt(),
+                getLatitude(),
+                getLongitude()
         );
     }
 

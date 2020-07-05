@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     tools:context=".ScreenWalkerActivity">
 
     <!--<TextView
@@ -45,29 +46,37 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <ImageView
+                <com.facebook.drawee.view.SimpleDraweeView
                     android:id="@+id/imageView2"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="180dp"
                     android:scaleType="centerCrop"
                     android:tint="@color/colorLightFade"
+                    app:layout_collapseMode="parallax"
+                    app:layout_collapseParallaxMultiplier="0.5"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/img_cao_01" />
 
-                <ImageView
+                <com.facebook.drawee.view.SimpleDraweeView
                     android:id="@+id/imageView3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="65dp"
+                    android:layout_height="65dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginLeft="16dp"
                     android:layout_marginBottom="32dp"
-                    android:background="@drawable/round_image"
-                    app:layout_constraintBottom_toBottomOf="@+id/imageView2"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:srcCompat="@drawable/avatar_example" />
+                    android:background="@drawable/avatar_example"
+                    fresco:fadeDuration="300"
+                    fresco:roundBottomStart="false"
+                    fresco:roundBottomEnd="false"
+                    fresco:roundingBorderWidth="3dp"
+                    fresco:roundingBorderColor="@color/colorLabelTitles"
+                    fresco:roundAsCircle="true"
+                    app:layout_collapseMode="parallax"
+                    app:layout_collapseParallaxMultiplier="0.5"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
 
                 <TextView
                     android:id="@+id/lblTitleProfile"
@@ -90,7 +99,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginLeft="16dp"
-                    android:text="4.7"
+                    android:text="0.0"
                     app:layout_constraintStart_toEndOf="@+id/imageView3"
                     app:layout_constraintTop_toBottomOf="@+id/lblTitleProfile" />
 

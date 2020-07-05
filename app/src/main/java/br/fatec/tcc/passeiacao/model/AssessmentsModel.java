@@ -1,8 +1,8 @@
 package br.fatec.tcc.passeiacao.model;
 
 public class AssessmentsModel {
-    private long id_assessment;
-    private long id_user;
+    private String id_assessment;
+    private String id_user;
     private String image;
     private String title;
     private double ratingBar;
@@ -12,7 +12,7 @@ public class AssessmentsModel {
     public AssessmentsModel() {
     }
 
-    public AssessmentsModel(long id_assessment, long id_user, String image, String title, double ratingBar, String comment, String createAt) {
+    public AssessmentsModel(String id_assessment, String id_user, String image, String title, double ratingBar, String comment, String createAt) {
         this.id_assessment = id_assessment;
         this.id_user = id_user;
         this.image = image;
@@ -22,19 +22,19 @@ public class AssessmentsModel {
         this.createAt = createAt;
     }
 
-    public long getId_assessment() {
+    public String getId_assessment() {
         return id_assessment;
     }
 
-    public void setId_assessment(long id_assessment) {
+    public void setId_assessment(String id_assessment) {
         this.id_assessment = id_assessment;
     }
 
-    public long getId_user() {
+    public String getId_user() {
         return id_user;
     }
 
-    public void setId_user(long id_user) {
+    public void setId_user(String id_user) {
         this.id_user = id_user;
     }
 
@@ -76,5 +76,26 @@ public class AssessmentsModel {
 
     public void setCreateAt(String createAt) {
         this.createAt = createAt;
+    }
+
+    public AssessmentsModel modelGet (){
+        return new AssessmentsModel(
+            getId_assessment(),
+            getId_user(),
+            getImage(),
+            getTitle(),
+            getRatingBar(),
+            getComment(),
+            getCreateAt()
+        );
+    }
+    public void updateModel (AssessmentsModel assessmentsModel){
+        this.setId_assessment(assessmentsModel.getId_assessment());
+        this.setId_user(assessmentsModel.getId_user());
+        this.setImage(assessmentsModel.getImage());
+        this.setTitle(assessmentsModel.getTitle());
+        this.setRatingBar(assessmentsModel.getRatingBar());
+        this.setComment(assessmentsModel.getComment());
+        this.setCreateAt(assessmentsModel.getCreateAt());
     }
 }

@@ -3,48 +3,52 @@ package br.fatec.tcc.passeiacao.model;
 public class DogModel {
     private String id;
     private String name;
-    private Integer age;    //idade
-    private String breed;   //raça
-    private Double weight;  //peso
-    private Double height;  //altura
+    private Integer age;        //idade
+    private String breed;       //raça
+    private Double weight;      //peso
+    private String genre;       //Sexo
+    //private Double height;      //altura
     private Boolean castrated;  //castrado
     private String comments;    //comentarios
     private String id_user;
+    private String image_dog;
 
     public DogModel() {
     }
 
-    public DogModel(String id, String name, Integer age, String breed, Double weight, Double height, Boolean castrated, String comments) {
+    public DogModel(String id, String name, Integer age, String breed, Double weight, String genre, Boolean castrated, String comments) {
         this.id = id;
         this.name = name;
         this.age = age;
         this.breed = breed;
         this.weight = weight;
-        this.height = height;
+        this.genre = genre;
         this.castrated = castrated;
         this.comments = comments;
     }
 
-    public DogModel(String name, Integer age, String breed, Double weight, Double height, Boolean castrated, String comments) {
+    public DogModel(String name, Integer age, String breed, Double weight, String genre, Boolean castrated, String comments, String image_dog) {
         this.name = name;
         this.age = age;
         this.breed = breed;
         this.weight = weight;
-        this.height = height;
+        this.genre = genre;
         this.castrated = castrated;
         this.comments = comments;
+        this.image_dog = image_dog;
     }
 
-    public DogModel(String id, String name, Integer age, String breed, Double weight, Double height, Boolean castrated, String comments, String id_user) {
+    public DogModel(String id, String name, Integer age, String breed, Double weight, String genre, Boolean castrated, String comments, String id_user, String image_dog) {
         this.id = id;
         this.name = name;
         this.age = age;
         this.breed = breed;
         this.weight = weight;
-        this.height = height;
+        this.genre = genre;
         this.castrated = castrated;
         this.comments = comments;
         this.id_user = id_user;
+        this.image_dog = image_dog;
     }
 
     public String getId() {
@@ -87,12 +91,12 @@ public class DogModel {
         this.weight = weight;
     }
 
-    public Double getHeight() {
-        return height;
+    public String getGenre() {
+        return genre;
     }
 
-    public void setHeight(Double height) {
-        this.height = height;
+    public void setGenre(String genre) {
+        this.genre = genre;
     }
 
     public Boolean getCastrated() {
@@ -119,6 +123,14 @@ public class DogModel {
         this.id_user = id_user;
     }
 
+    public String getImage_dog() {
+        return image_dog;
+    }
+
+    public void setImage_dog(String image_dog) {
+        this.image_dog = image_dog;
+    }
+
     public DogModel modelGet (){
         return new DogModel(
                 getId(),
@@ -126,10 +138,11 @@ public class DogModel {
                 getAge(),
                 getBreed(),
                 getWeight(),
-                getHeight(),
+                getGenre(),
                 getCastrated(),
                 getComments(),
-                getId_user()
+                getId_user(),
+                getImage_dog()
         );
     }
     public void updateModel (DogModel dogModel){
@@ -138,9 +151,10 @@ public class DogModel {
         this.setAge(dogModel.getAge());
         this.setBreed(dogModel.getBreed());
         this.setWeight(dogModel.getWeight());
-        this.setHeight(dogModel.getHeight());
+        this.setGenre(dogModel.getGenre());
         this.setCastrated(dogModel.getCastrated());
         this.setComments(dogModel.getComments());
         this.setId_user(dogModel.getId_user());
+        this.setImage_dog(dogModel.getImage_dog());
     }
 }

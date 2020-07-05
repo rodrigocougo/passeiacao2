@@ -5,12 +5,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
+import android.webkit.URLUtil;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -22,6 +30,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -29,12 +38,20 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StorageTask;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.UUID;
 
 import br.fatec.tcc.passeiacao.model.DogModel;
 
 public class RegisterDogActivity extends AppCompatActivity {
+
+    // request code
+    private final int PICK_IMAGE_REQUEST_DOG = 1;
 
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseReference;
@@ -47,19 +64,29 @@ public class RegisterDogActivity extends AppCompatActivity {
     EditText edtAgeDog;
     Spinner spnBreedDog;
     EditText edtWeightDog;
-    EditText edtHeightDog;
+    Spinner spnGenreDog;
     Spinner spnCastrated;
     EditText edtObservationDog;
     Button btnRegisterDog;
+    String downloadUrlDog = "";
 
     private AlertDialog.Builder confirmacao;
 
-    private String Breed = "--";
-    private String Castred = "--";
+    private String Breed = "Raça --";
+    private String Castred = "Castrado --";
+    private String Genre = "Sexo --";
     private TextView idTextView;
     private String id = "";
     private String id_user_firebase = "";
     String id_dog = null;
+
+    private Uri mImageUri;
+    private StorageReference mStorageRef;
+    private DatabaseReference mDatabaseRef;
+    private StorageTask mUploadTask;
+
+    private final String mMsqInfo = "";
+    private ProgressDialog mDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +95,7 @@ public class RegisterDogActivity extends AppCompatActivity {
 
         //Inicializa o FireBase
         inicializaFireBase();
+        mStorageRef = FirebaseStorage.getInstance().getReference("uploads");
 
         //Faz o carregamento dos dados do usuario selecionado
         Intent origemIntent = getIntent();
@@ -102,6 +130,13 @@ public class RegisterDogActivity extends AppCompatActivity {
             }
         });
 
+        imgCoverDog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openFileChooser(PICK_IMAGE_REQUEST_DOG);
+            }
+        });
+
         if(bundle.getBoolean("updateUI")){
             loadingDatasUpdate(bundle);
             btnRegisterDog.setText("ATUALIZAR DADOS");
@@ -128,12 +163,11 @@ public class RegisterDogActivity extends AppCompatActivity {
         edtAgeDog = findViewById(R.id.edtAgeDog);
         spnBreedDog = findViewById(R.id.spnBreedDog);
         edtWeightDog = findViewById(R.id.edtWeightDog);
-        edtHeightDog = findViewById(R.id.edtHeightDog);
+        spnGenreDog = findViewById(R.id.spnGenreDog);
         spnCastrated = findViewById(R.id.spnCastrated);
         edtObservationDog = findViewById(R.id.edtObservationDog);
 
         //Formatação dos campos
-
         ArrayAdapter<CharSequence> adapterBreedDog = ArrayAdapter.createFromResource(this,
                 R.array.arr_breed, android.R.layout.simple_spinner_item);
         adapterBreedDog.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -141,6 +175,9 @@ public class RegisterDogActivity extends AppCompatActivity {
         spnBreedDog.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(position == 0){
+                    ((TextView) parent.getChildAt(position)).setTextColor(Color.GRAY);
+                }
                 Breed = parent.getItemAtPosition(position).toString();
                 //Toast.makeText(getBaseContext(), Breed, Toast.LENGTH_SHORT).show();
                 /*parent.getSelectedView();
@@ -152,7 +189,32 @@ public class RegisterDogActivity extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                Breed = "--";
+                Breed = "Raça --";
+            }
+        });
+
+        ArrayAdapter<CharSequence> adapterGenreDog = ArrayAdapter.createFromResource(this,
+                R.array.arr_genre_dog, android.R.layout.simple_spinner_item);
+        adapterGenreDog.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spnGenreDog.setAdapter(adapterGenreDog);
+        spnGenreDog.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(position == 0){
+                    ((TextView) parent.getChildAt(position)).setTextColor(Color.GRAY);
+                }
+                Genre = parent.getItemAtPosition(position).toString();
+                //Toast.makeText(getBaseContext(), Breed, Toast.LENGTH_SHORT).show();
+                /*parent.getSelectedView();
+                TextView errorText = (TextView) parent.getSelectedView();
+                errorText.setError("Preenchimento obrigatório");
+                errorText.setTextColor(Color.RED);//just to highlight that this is an error
+                errorText.setText("--");//changes the selected item text to this*/
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                Breed = "Raça --";
             }
         });
 
@@ -163,13 +225,16 @@ public class RegisterDogActivity extends AppCompatActivity {
         spnCastrated.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(position == 0){
+                    ((TextView) parent.getChildAt(position)).setTextColor(Color.GRAY);
+                }
                 Castred = parent.getItemAtPosition(position).toString();
                 //Toast.makeText(getBaseContext(), TypeDog, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                Castred = "--";
+                Castred = "Castrado --";
             }
         });
 
@@ -188,7 +253,7 @@ public class RegisterDogActivity extends AppCompatActivity {
             edtNameDog.setError("Preenchimento obrigatório");
             edtNameDog.requestFocus();
             return true;
-        }else if (Breed.toString().trim().equals("--")){
+        }else if (Breed.toString().trim().equals("Raça --")){
             ((TextView)spnBreedDog.getChildAt(0)).setError("Message");
 //            spnBreedDog.setError("Preenchimento obrigatório");
             spnBreedDog.requestFocus();
@@ -207,23 +272,20 @@ public class RegisterDogActivity extends AppCompatActivity {
         String medtNameDog = edtNameDog.getText().toString();
         Integer medtAgeDog = Integer.parseInt(edtAgeDog.getText().toString());
         Double medtWeightDog = Double.valueOf(edtWeightDog.getText().toString());
-        Double medtHeightDog = Double.valueOf(edtHeightDog.getText().toString());
+        //Double mspnGenreDog = Double.valueOf(spnGenreDog.getText().toString());
         String medtObservationDog = edtObservationDog.getText().toString();
-
-        //Grava o ID EM UM CAMPO INVISIBLE PARA UPDATE (Porteriormente remover este procedimento)
-        //idTextView.setText(id.toString());
 
         //Faz a formatação dos dados
         DogModel dogModel = new DogModel(
                 medtNameDog,
                 medtAgeDog,
-                Breed,
+                !Breed.equals("Raça --") ? Breed : "",
                 medtWeightDog,
-                medtHeightDog,
-                Castred == "Sim" ? true : false,
-                medtObservationDog
+                !Genre.equals("Sexo --") ? Genre : "",
+                Castred.equals("Sim") ? true : false,
+                medtObservationDog,
+                downloadUrlDog
         );
-
         dogModel.setId(id);
 
         return dogModel;
@@ -237,7 +299,7 @@ public class RegisterDogActivity extends AppCompatActivity {
         databaseReference = firebaseDatabase.getReference();
     }
 
-    /* Função para carregamento da interface, apenas transportei o código existente do onCreate pra cá*/
+    /* Função para carregamento da interface, apenas transportei o código existente do onCreate pra cá */
     private void updateUI(String email){
 
         // dialog = new AlertDialog.Builder(MainActivity.this);
@@ -272,14 +334,18 @@ public class RegisterDogActivity extends AppCompatActivity {
         id_dog = bundle.getString("id_dog");
         String name = bundle.getString("name");
         Integer age = bundle.getInt("age", 0);
-        String breed = bundle.getString("breed", "--");
+        String breed = bundle.getString("breed", "Raça --");
         Boolean castrated = bundle.getBoolean("castrated");
         String comments = bundle.getString("comments");
-        Double height = bundle.getDouble("height", 0.0);
+        String genre = bundle.getString("genre", "Sexo --");
         Double weight = bundle.getDouble("weight", 0.0);
+        String image = bundle.getString("image", "");
 
         ArrayAdapter<CharSequence> adapterBreedDog = ArrayAdapter.createFromResource(this,
                 R.array.arr_breed, android.R.layout.simple_spinner_item);
+
+        ArrayAdapter<CharSequence> adapterGenre = ArrayAdapter.createFromResource(this,
+                R.array.arr_castrated, android.R.layout.simple_spinner_item);
 
         ArrayAdapter<CharSequence> adapterCastrated = ArrayAdapter.createFromResource(this,
                 R.array.arr_castrated, android.R.layout.simple_spinner_item);
@@ -288,13 +354,17 @@ public class RegisterDogActivity extends AppCompatActivity {
         edtAgeDog.setText(age.toString());
         spnBreedDog.setSelection(((ArrayAdapter)spnBreedDog.getAdapter()).getPosition(breed.toString()));
         edtWeightDog.setText(weight.toString());
-        edtHeightDog.setText(height.toString());
-        //spnCastrated.setSelection(adapterCastrated.getPosition(castrated));
+        //spnGenreDog.setText(genre);
+        spnGenreDog.setSelection(((ArrayAdapter)spnGenreDog.getAdapter()).getPosition(genre.toString()));
         spnCastrated.setSelection(((ArrayAdapter)spnCastrated.getAdapter()).getPosition(castrated ? "Sim" : "Não"));
         edtObservationDog.setText(comments);
+        if(URLUtil.isValidUrl(image)) {
+            downloadUrlDog = image;
+            imgCoverDog.setImageURI(Uri.parse(image));
+        }
     }
     //    #############################################################################################
-    /*PRINCIPAIS FUNÇÕES CRUD*/
+    /* PRINCIPAIS FUNÇÕES CRUD */
     private void insertDogFireBase(final DogModel dogModel){
 
         if(id_user_firebase == null) {return;}
@@ -327,7 +397,8 @@ public class RegisterDogActivity extends AppCompatActivity {
         dogModel.setId(id_dog);
         dogModel.setId_user(id_user_firebase);
 
-        databaseReference.child("Dogs").orderByChild("id_user").equalTo(id_user_firebase).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child("Dogs").orderByChild("id").equalTo(id_dog).addListenerForSingleValueEvent(new ValueEventListener() {
+        //databaseReference.child("Dogs").child(id_dog).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
@@ -366,4 +437,85 @@ public class RegisterDogActivity extends AppCompatActivity {
     }
 //    #############################################################################################
 //    android:digits="0123456789.-"
+//    #############################################################################################
+    private void openFileChooser(Integer PICK_IMAGE_REQUEST) {
+    Intent intent = new Intent();
+    intent.setType("image/*");
+    intent.setAction(Intent.ACTION_GET_CONTENT);
+    startActivityForResult(intent, PICK_IMAGE_REQUEST);
+}
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mDialog = new ProgressDialog(this);
+        mDialog.setTitle("Aguarde...");
+        mDialog.setMessage(mMsqInfo);
+        mDialog.setCancelable(true);
+        mDialog.show();
+
+        if (requestCode == PICK_IMAGE_REQUEST_DOG && resultCode == RESULT_OK
+                && data != null && data.getData() != null) {
+            mImageUri = data.getData();
+            //Picasso.get().load(mImageUri).into(imgAvatarRegisterUser);
+            imgCoverDog.setImageURI(mImageUri);
+            if (mImageUri != null) {
+                StorageReference fileReference = mStorageRef.child(System.currentTimeMillis()
+                        + "." + getFileExtension(mImageUri));
+                mUploadTask = fileReference.putFile(mImageUri)
+                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                Handler handler = new Handler();
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        //mProgressBar.setProgress(0);
+                                        //Fecha o load
+                                        if ((mDialog != null) && ( mDialog.isShowing())){
+                                            mDialog.dismiss();
+                                            mDialog = null;
+                                        }
+                                    }
+                                }, 500);
+                                Task<Uri> urlTask = taskSnapshot.getStorage().getDownloadUrl();
+                                while (!urlTask.isSuccessful());
+                                Uri downloadUrl = urlTask.getResult();
+                                downloadUrlDog = downloadUrl.toString();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                //Fecha o load
+                                if ((mDialog != null) && ( mDialog.isShowing())){
+                                    mDialog.dismiss();
+                                    mDialog = null;
+                                }
+                                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+                                mDialog.setMessage(
+                                        "Carregando "
+                                                + (int)progress + "%");
+                                //mProgressBar.setProgress((int) progress);
+                            }
+                        });
+            }
+        } else {
+            //Fecha o load
+            if ((mDialog != null) && ( mDialog.isShowing())){
+                mDialog.dismiss();
+                mDialog = null;
+            }
+        }
+    }
+    private String getFileExtension(Uri uri) {
+        ContentResolver cR = getContentResolver();
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        return mime.getExtensionFromMimeType(cR.getType(uri));
+    }
 }

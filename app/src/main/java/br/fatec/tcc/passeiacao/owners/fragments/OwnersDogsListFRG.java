@@ -29,6 +29,8 @@ import java.util.List;
 import br.fatec.tcc.passeiacao.RegisterDogActivity;
 import br.fatec.tcc.passeiacao.R;
 import br.fatec.tcc.passeiacao.interfaces.InterfaceClickDogsFA;
+import br.fatec.tcc.passeiacao.interfaces.InterfaceClickDogsForProfileView;
+import br.fatec.tcc.passeiacao.model.ScheduledModel;
 import br.fatec.tcc.passeiacao.owners.adapters.OwnersADP;
 import br.fatec.tcc.passeiacao.model.DogModel;
 import br.fatec.tcc.passeiacao.service.firebaseService;
@@ -50,15 +52,20 @@ public class OwnersDogsListFRG extends Fragment implements InterfaceClickDogsFA 
     private RecyclerView mRecyclerViewListDogs;
     private OwnersADP mOwnersADP;
     private List<DogModel> dogModelList = new ArrayList<>();
-    ;
+
     private ProgressBar mProgressBar;
     private TextView txvNotData;
     private static String idUserFirebase = "";
 
+    public static Integer typeFragmen = -1;
+
+    private InterfaceClickDogsForProfileView mInterfaceClickDogsForProfileView;
+
     // TODO: Rename and change types and number of parameters
-    public static OwnersDogsListFRG newInstance(String midUserFirebase) {
+    public static OwnersDogsListFRG newInstance(String midUserFirebase, Integer typ) {
         OwnersDogsListFRG fragment = new OwnersDogsListFRG();
         idUserFirebase = midUserFirebase;
+        typeFragmen = typ;
         return fragment;
     }
 
@@ -91,7 +98,7 @@ public class OwnersDogsListFRG extends Fragment implements InterfaceClickDogsFA 
         StaggeredGridLayoutManager llmCat = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
         llmCat.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_NONE);
         mRecyclerViewListDogs.setLayoutManager(llmCat);
-        mOwnersADP = new OwnersADP((ArrayList<Object>) (List<?>) dogModelList, IS_DOGS);
+        mOwnersADP = new OwnersADP((ArrayList<Object>) (List<?>) dogModelList, typeFragmen);
         mOwnersADP.setInterfaceClickDogsFA(this);
         mRecyclerViewListDogs.setAdapter(mOwnersADP);
         mProgressBar.setVisibility(View.GONE);
@@ -102,6 +109,8 @@ public class OwnersDogsListFRG extends Fragment implements InterfaceClickDogsFA 
     }
 
     private void getDogs() {
+        mProgressBar.setVisibility(View.VISIBLE);
+        txvNotData.setVisibility(View.INVISIBLE);
         fbReferenceDogs.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -111,10 +120,10 @@ public class OwnersDogsListFRG extends Fragment implements InterfaceClickDogsFA 
                         DogModel dog = postSnapshot.getValue(DogModel.class);
                         mOwnersADP.addRegisterDog(dog);
                     }
-                    mProgressBar.setVisibility(View.GONE);
+                    mProgressBar.setVisibility(View.INVISIBLE);
                     mRecyclerViewListDogs.setVisibility(View.VISIBLE);
                 }else{
-                    mProgressBar.setVisibility(View.GONE);
+                    mProgressBar.setVisibility(View.INVISIBLE);
                     txvNotData.setVisibility(View.VISIBLE);
                 }
             }
@@ -123,15 +132,30 @@ public class OwnersDogsListFRG extends Fragment implements InterfaceClickDogsFA 
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Toast.makeText(getApplicationContext(), "Erro na conexão! " + databaseError,
                         Toast.LENGTH_SHORT).show();
-                mProgressBar.setVisibility(View.GONE);
+                mProgressBar.setVisibility(View.INVISIBLE);
                 txvNotData.setVisibility(View.VISIBLE);
             }
         });
     }
 
     @Override
-    public void onClickListenerDogCard(Object selected) {
-        getDogId((DogModel) selected);
+    public void onClickListenerDogCard(Object selected, Integer typeFragment, Integer method) {
+        if(typeFragment == IS_DOGS){
+            getDogId((DogModel) selected);
+        }else{
+            onClickListenerDogCheck(selected, method);
+        }
+    }
+
+    @Override
+    public void onClickListenerDogCheck(Object selected, Integer method) {
+        if(mInterfaceClickDogsForProfileView != null) {
+            mInterfaceClickDogsForProfileView.onClickListenerDogCheckForProfile(selected, method);
+        }
+    }
+
+    public void setInterfaceClickDogsForProfileView (InterfaceClickDogsForProfileView r){
+        mInterfaceClickDogsForProfileView = r;
     }
 
     public void getDogId(final DogModel dogSelected) {
@@ -146,8 +170,9 @@ public class OwnersDogsListFRG extends Fragment implements InterfaceClickDogsFA 
             intent.putExtra("breed", dogSelected.getBreed());
             intent.putExtra("castrated", dogSelected.getCastrated());
             intent.putExtra("comments", dogSelected.getComments());
-            intent.putExtra("height", dogSelected.getHeight());
+            intent.putExtra("genre", dogSelected.getGenre());
             intent.putExtra("weight", dogSelected.getWeight());
+            intent.putExtra("image", dogSelected.getImage_dog());
             intent.putExtra("updateUI", true);
             intent.putExtra("id_user_auth", idUserFirebase);
             startActivity(intent);

@@ -1,10 +1,12 @@
 package br.fatec.tcc.passeiacao.owners.adapters;
 
 import android.graphics.Color;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.URLUtil;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -12,6 +14,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +31,10 @@ import br.fatec.tcc.passeiacao.model.ScheduledModel;
 import br.fatec.tcc.passeiacao.model.UserModel;
 
 import static aplicacao.passeiacao.IS_DOGS;
+import static aplicacao.passeiacao.IS_DOG_PROFILE;
 import static aplicacao.passeiacao.IS_HISTORICAL;
+import static aplicacao.passeiacao.IS_INSERT;
+import static aplicacao.passeiacao.IS_REMOVE;
 import static aplicacao.passeiacao.IS_SCHEDULED;
 import static aplicacao.passeiacao.IS_SEARCH;
 
@@ -39,6 +46,7 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
     private InterfaceClickDogsFA mInterfaceClickDogsFA;
     private InterfaceClickScheduledFA mInterfaceClickScheduledFA;
     private InterfaceClickHistoricalFA mInterfaceClickHistoricalFA;
+    public static Integer typeFragmen = -1;
 
     public OwnersADP(ArrayList<Object> mDataSet, Integer vTipoInterface) {
         this.mDataSet = mDataSet;
@@ -62,6 +70,9 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
         }else if(vTipoInterface == IS_HISTORICAL){
             v = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.card_owner_history, parent, false);
+        }else if(vTipoInterface == IS_DOG_PROFILE){
+            v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.card_owner_dogs, parent, false);
         }
 
         return new OwnersADP.ViewHolder(v);
@@ -79,53 +90,70 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
             }else{
                 holder.rtbProfileWalker.setRating(0);
             }
-        }else if(vTipoInterface == IS_DOGS) {     //Dogs
+            if(URLUtil.isValidUrl(mDataSetTemp.get(position).getImageAvatar())) {
+                holder.imgAvatarWalker.setImageURI(Uri.parse(mDataSetTemp.get(position).getImageAvatar()));
+            }
+        }else if(vTipoInterface == IS_DOGS || vTipoInterface == IS_DOG_PROFILE) {     //Dogs
             ArrayList<DogModel> mDataSetTemp = (ArrayList<DogModel>)(List<?>) mDataSet;
             holder.lblTitleCardOwnerDogs.setText(mDataSetTemp.get(position).getName());
             holder.lblSubTitleCardOwnerDogs.setText(mDataSetTemp.get(position).getBreed());
+            if(URLUtil.isValidUrl(mDataSetTemp.get(position).getImage_dog())) {
+                holder.imgAvatarOwnerDogs.setImageURI(Uri.parse(mDataSetTemp.get(position).getImage_dog()));
+            }
+            /*if(URLUtil.isValidUrl(mDataSetTemp.get(position).getImageCover())) {
+                holder.imgAvatarWalker.setImageURI(Uri.parse(mDataSetTemp.get(position).getImageAvatar()));
+            }*/
         }else if(vTipoInterface == IS_SCHEDULED) {     //Agendados
             final ArrayList<ScheduledModel> mDataSetTemp = (ArrayList<ScheduledModel>)(List<?>) mDataSet;
             holder.lblTitleCardOwnerScheduled.setText(mDataSetTemp.get(position).getTitle_walker());
             holder.lblSubTitleCardOwnerScheduled.setText(mDataSetTemp.get(position).getAddress_walker());
-            holder.lblLinkOwnerScheduled.setVisibility(View.VISIBLE);
+            holder.lblLinkOwnerScheduled.setVisibility(View.GONE);
+            holder.lblHighlighterOwnerScheduled.setVisibility(View.VISIBLE);
+            if(URLUtil.isValidUrl(mDataSetTemp.get(position).getImage_walker())) {
+                holder.imgAvatarOwnerScheduled.setImageURI(Uri.parse(mDataSetTemp.get(position).getImage_walker()));
+            }
 
             if(mDataSetTemp.get(position).getSend_invitation() == false){               //Foi enviado ?
+                holder.lblLinkOwnerScheduled.setVisibility(View.VISIBLE);
                 holder.lblHighlighterOwnerScheduled.setText("●  Aguardando\nsinal");
                 holder.lblLinkOwnerScheduled.setText("CANCELAR");
                 holder.lblLinkOwnerScheduled.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         if(mInterfaceClickScheduledFA != null) {
-                            mInterfaceClickScheduledFA.onClickListenerScheduledCANCEL(mDataSetTemp.get(position));
+                            mInterfaceClickScheduledFA.onClickListenerScheduledCANCEL(mDataSetTemp.get(position), false);
                         }
                     }
                 });
 
             }if(mDataSetTemp.get(position).getReceived_invitation() == true){           //Recebeu o convite
+                holder.lblLinkOwnerScheduled.setVisibility(View.VISIBLE);
                 holder.lblHighlighterOwnerScheduled.setText("●  Recebido");
                 holder.lblLinkOwnerScheduled.setText("CANCELAR");
                 holder.lblLinkOwnerScheduled.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         if(mInterfaceClickScheduledFA != null) {
-                            mInterfaceClickScheduledFA.onClickListenerScheduledCANCEL(mDataSetTemp.get(position));
+                            mInterfaceClickScheduledFA.onClickListenerScheduledCANCEL(mDataSetTemp.get(position), false);
                         }
                     }
                 });
 
             }if(mDataSetTemp.get(position).getConfirmed_invitation() == true){          //Confirmou o interesse (agendou)
+                holder.lblLinkOwnerScheduled.setVisibility(View.VISIBLE);
                 holder.lblHighlighterOwnerScheduled.setText("●  Aceitou\nconvite");
                 holder.lblLinkOwnerScheduled.setText("CANCELAR");
                 holder.lblLinkOwnerScheduled.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         if(mInterfaceClickScheduledFA != null) {
-                            mInterfaceClickScheduledFA.onClickListenerScheduledCANCEL(mDataSetTemp.get(position));
+                            mInterfaceClickScheduledFA.onClickListenerScheduledCANCEL(mDataSetTemp.get(position), true);
                         }
                     }
                 });
 
             }if(mDataSetTemp.get(position).getInitiated_invitation() == true){          //Sinalizou o inicio do passeio
+                holder.lblLinkOwnerScheduled.setVisibility(View.VISIBLE);
                 holder.lblHighlighterOwnerScheduled.setText("●  Aguardando\nsinal seu");
                 holder.lblLinkOwnerScheduled.setText("CONFIRMAR INICIO");
                 holder.lblLinkOwnerScheduled.setOnClickListener(new View.OnClickListener() {
@@ -138,6 +166,7 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
                 });
 
             }if(mDataSetTemp.get(position).getConfirmed_initiated_invitation() == true){          //Confirmou o inicio do passeio
+                holder.lblLinkOwnerScheduled.setVisibility(View.VISIBLE);
                 holder.lblHighlighterOwnerScheduled.setText("●  Passeio\niniciado");
                 holder.lblLinkOwnerScheduled.setText("FINALIZAR\nPASSEIO");
                 holder.imvIconPlace.setVisibility(View.VISIBLE);
@@ -151,6 +180,7 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
                 });
 
             }if(mDataSetTemp.get(position).getDone_invitation() == true){               //Sinalizou o fim do passeio
+                holder.lblLinkOwnerScheduled.setVisibility(View.VISIBLE);
                 holder.lblHighlighterOwnerScheduled.setText("●  Aguardando\nsinal");
                 holder.lblLinkOwnerScheduled.setText("FINALIZAR\nPASSEIO");
                 holder.imvIconPlace.setVisibility(View.GONE);
@@ -169,7 +199,8 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
                 holder.imvIconPlace.setVisibility(View.GONE);
 
             }if(mDataSetTemp.get(position).getConfirmed_done_invitation() == true && mDataSetTemp.get(position).getDone_invitation() == true){     //Confirmou o fim do passeio (Apenas o Dono pode) ETAPA FINAL
-                holder.lblHighlighterOwnerScheduled.setText("●  Aguardando\nsinal");
+                holder.lblLinkOwnerScheduled.setVisibility(View.VISIBLE);
+                holder.lblHighlighterOwnerScheduled.setText("●  Passeio\nfinalizado");
                 holder.lblLinkOwnerScheduled.setText("ENCERRAR");
                 holder.imvIconPlace.setVisibility(View.GONE);
                 holder.lblLinkOwnerScheduled.setVisibility(View.VISIBLE);
@@ -182,7 +213,8 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
                     }
                 });
 
-            }if(mDataSetTemp.get(position).getCanceled_invitation() == true){           //Cancelado
+            }if(mDataSetTemp.get(position).getCanceled_invitation() == true && mDataSetTemp.get(position).getConfirmed_done_invitation() == false){           //Cancelado
+                holder.lblLinkOwnerScheduled.setVisibility(View.VISIBLE);
                 holder.lblHighlighterOwnerScheduled.setText("●  Cancelado");
                 holder.lblHighlighterOwnerScheduled.setTextColor(Color.RED);
                 holder.lblLinkOwnerScheduled.setText("ENCERRAR");
@@ -202,6 +234,34 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
             ArrayList<ScheduledModel> mDataSetTemp = (ArrayList<ScheduledModel>)(List<?>) mDataSet;
             holder.lblTitleCardOwnerHistory.setText(mDataSetTemp.get(position).getTitle_walker());
             holder.lblSubTitleCardOwnerHistory.setText(mDataSetTemp.get(position).getAddress_walker());
+            if(URLUtil.isValidUrl(mDataSetTemp.get(position).getImage_walker())) {
+                holder.imgAvatarOwnerHistory.setImageURI(Uri.parse(mDataSetTemp.get(position).getImage_walker()));
+            }
+
+            if(mDataSetTemp.get(position).getCanceled_invitation() == false) {
+                holder.lblLink2OwnerHistory.setVisibility(View.GONE);
+            }else{
+                holder.lblHighlighterOwnerScheduled.setText("Cancelado");
+                holder.lblHighlighterOwnerScheduled.setTextColor(Color.RED);
+                holder.lblHighlighterOwnerScheduled.setVisibility(View.VISIBLE);
+                holder.lblLinkOwnerHistory.setVisibility(View.INVISIBLE);
+                holder.lblLink2OwnerHistory.setVisibility(View.GONE);
+                return;
+            }
+            holder.lblLink2OwnerHistory.setVisibility(View.VISIBLE);  //Contratar novamente
+            if(mDataSetTemp.get(position).getConfirmed_done_invitation() == true && mDataSetTemp.get(position).getAssessment_date_walker() == null) {
+                holder.lblHighlighterOwnerScheduled.setText("Finalizado\ncom sucesso");
+                holder.lblHighlighterOwnerScheduled.setTextColor(Color.GREEN);
+                holder.lblHighlighterOwnerScheduled.setVisibility(View.VISIBLE);
+                holder.lblLink2OwnerHistory.setVisibility(View.GONE);
+                holder.lblLinkOwnerHistory.setVisibility(View.VISIBLE);   //Avaliar
+            }else{
+                holder.lblHighlighterOwnerScheduled.setText("Já avaliado");
+                holder.lblHighlighterOwnerScheduled.setTextColor(Color.GREEN);
+                holder.lblHighlighterOwnerScheduled.setVisibility(View.VISIBLE);
+                holder.lblLink2OwnerHistory.setVisibility(View.GONE);
+                holder.lblLinkOwnerHistory.setVisibility(View.INVISIBLE);   //Já Avaliado
+            }
         }
     }
 
@@ -212,6 +272,7 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
         TextView lblTitleCardWalker;
         TextView lblSubTitleCardWalker;
         TextView lblNoteWalker;
+        SimpleDraweeView imgAvatarWalker;
 
         //dogs list
         CardView cdvCardOwnerDogs;
@@ -246,6 +307,7 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
                 cdvCardWalkerSearch = v.findViewById(R.id.cdvCardWalkerSearch);
                 lblNoteWalker = v.findViewById(R.id.lblNoteWalker);
                 rtbProfileWalker = v.findViewById(R.id.rtbProfileWalker);
+                imgAvatarWalker = v.findViewById(R.id.imgAvatarWalker);
                 cdvCardWalkerSearch.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -255,7 +317,7 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
                         }
                     }
                 });
-            }else if(vTipoInterface == IS_DOGS) {
+            }else if(vTipoInterface == IS_DOGS || vTipoInterface == IS_DOG_PROFILE) {
                 cdvCardOwnerDogs = v.findViewById(R.id.cdvCardOwnerDogs);
                 imgAvatarOwnerDogs = v.findViewById(R.id.imgAvatarOwnerDogs);
                 lblTitleCardOwnerDogs = v.findViewById(R.id.lblTitleCardOwnerDogs);
@@ -266,7 +328,18 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
                     public void onClick(View v) {
                         if(mInterfaceClickDogsFA != null) {
                             ArrayList<DogModel> mDataSetTemp = (ArrayList<DogModel>)(List<?>) mDataSet;
-                            mInterfaceClickDogsFA.onClickListenerDogCard(mDataSetTemp.get(getPosition()));
+                            if(vTipoInterface == IS_DOG_PROFILE){
+                                int color = cdvCardOwnerDogs.getCardBackgroundColor().getDefaultColor();
+                                if(color == Color.GREEN){
+                                    cdvCardOwnerDogs.setCardBackgroundColor(Color.WHITE);
+                                    mInterfaceClickDogsFA.onClickListenerDogCard(mDataSetTemp.get(getPosition()), vTipoInterface, IS_REMOVE);
+                                }else{
+                                    cdvCardOwnerDogs.setCardBackgroundColor(Color.GREEN);
+                                    mInterfaceClickDogsFA.onClickListenerDogCard(mDataSetTemp.get(getPosition()), vTipoInterface, IS_INSERT);
+                                }
+                            } else {
+                                mInterfaceClickDogsFA.onClickListenerDogCard(mDataSetTemp.get(getPosition()), vTipoInterface, -1);
+                            }
                         }
                     }
                 });
@@ -287,6 +360,15 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
                         }
                     }
                 });
+                imvIconPlace.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(mInterfaceClickScheduledFA != null) {
+                            ArrayList<ScheduledModel> mDataSetTemp = (ArrayList<ScheduledModel>)(List<?>) mDataSet;
+                            mInterfaceClickScheduledFA.onClickListenerLocationMap(mDataSetTemp.get(getPosition()));
+                        }
+                    }
+                });
             }else if(vTipoInterface == IS_HISTORICAL) {
                 cdvCardOwnerHistory = v.findViewById(R.id.cdvCardOwnerHistory);
                 imgAvatarOwnerHistory = v.findViewById(R.id.imgAvatarOwnerHistory);
@@ -294,13 +376,22 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
                 lblSubTitleCardOwnerHistory = v.findViewById(R.id.lblSubTitleCardOwnerHistory);
                 lblLinkOwnerHistory = v.findViewById(R.id.lblLinkOwnerHistory);
                 lblLink2OwnerHistory = v.findViewById(R.id.lblLink2OwnerHistory);
-
+                lblHighlighterOwnerScheduled = v.findViewById(R.id.lblHighlighterOwnerScheduled);
                 cdvCardOwnerHistory.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         if(mInterfaceClickIFA != null) {
                             ArrayList<HistoricalModel> mDataSetTemp = (ArrayList<HistoricalModel>)(List<?>) mDataSet;
                             mInterfaceClickIFA.onClickListenerUserProfile(mDataSetTemp.get(getPosition()));
+                        }
+                    }
+                });
+                lblLinkOwnerHistory.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(mInterfaceClickHistoricalFA != null) {
+                            ArrayList<ScheduledModel> mDataSetTemp = (ArrayList<ScheduledModel>)(List<?>) mDataSet;
+                            mInterfaceClickHistoricalFA.onClickListenerAssessment(mDataSetTemp.get(getPosition()));
                         }
                     }
                 });
@@ -318,27 +409,25 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
         return mDataSet != null ? mDataSet.size() : 0;
     }
 
+    //Interfaces
     public void setInterfaceClickIFA (InterfaceClickIFA r){
         mInterfaceClickIFA = r;
     }
-
     public void setInterfaceClickDogsFA (InterfaceClickDogsFA r){
         mInterfaceClickDogsFA = r;
     }
-
     public void setmInterfaceClickScheduledFA (InterfaceClickScheduledFA r){
         mInterfaceClickScheduledFA = r;
     }
-
     public void setInterfaceClickHistoricalFA (InterfaceClickHistoricalFA r){
         mInterfaceClickHistoricalFA = r;
     }
 
+    //Funções de add/remove/update no adaptador
     public void addUserAll (ArrayList<UserModel> item) {
         this.mDataSet = (ArrayList<Object>)(List<?>) item;
         notifyDataSetChanged();
     }
-
     public void addRegisterDog (Object item){
         ArrayList<DogModel> mDataSetTemp = (ArrayList<DogModel>)(List<?>) mDataSet;
         DogModel mDataSetTempItem = (DogModel) item;
@@ -353,7 +442,6 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
         this.mDataSet.add((DogModel) item);
         notifyItemInserted(getItemCount());
     }
-
     public void addRegisterScheduled (Object item){
         ArrayList<ScheduledModel> mDataSetTemp = (ArrayList<ScheduledModel>)(List<?>) mDataSet;
         ScheduledModel mDataSetTempItem = (ScheduledModel) item;
@@ -368,7 +456,6 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
         this.mDataSet.add((ScheduledModel) item);
         notifyItemInserted(getItemCount());
     }
-
     public void removeRegisterScheduled(Object item) {
         if (mDataSet == null) return;
         ArrayList<ScheduledModel> mDataSetTemp = (ArrayList<ScheduledModel>) (List<?>) mDataSet;

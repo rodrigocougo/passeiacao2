@@ -14,7 +14,11 @@ public class passeiacao extends Application {
     //Constantes globais;
     public static int DONO = 0, PASSEADOR = 1;
 
-    public static int IS_SEARCH = 0, IS_DOGS = 1, IS_SCHEDULED = 2, IS_HISTORICAL = 3;
+    public static int IS_SEARCH = 0, IS_DOGS = 1, IS_SCHEDULED = 2, IS_HISTORICAL = 3, IS_DOG_PROFILE = 4;
+    public static int IS_OWNER = 0, IS_WALKER = 1;
+    public static int IS_INSERT = 0, IS_REMOVE = 1;
+    public static double SET_LON=0;
+    public static double SET_LAT=0;
 
     @Override
     public void onCreate() {

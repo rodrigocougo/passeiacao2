@@ -153,7 +153,7 @@ public class OwnersSearchFRG extends Fragment implements InterfaceClickIFA, Upda
     }
     @Override
     public void onClickListenerUserProfile(Object userSelected) {
-        Log.d("OwnersSearchFRG", "CHEGOU");
+        //Log.d("OwnersSearchFRG", "CHEGOU");
         /*Intent intent = new Intent(getActivity(), ScreenWalkerActivity.class);
         startActivity(intent);*/
         getWalkerEmail ((UserModel) userSelected);
@@ -183,7 +183,7 @@ public class OwnersSearchFRG extends Fragment implements InterfaceClickIFA, Upda
                         intent.putExtra("birth", userSelected.getNascConvertAge());
                         intent.putExtra("performed", userSelected.getConcluded());
                         intent.putExtra("canceled", userSelected.getCanceled());
-                        intent.putExtra("image", userSelected.getNome());
+                        intent.putExtra("image", userSelected.getImageAvatar());
                         startActivity(intent);
                     } else {
                         //Avisa que o e-mail é invalida!
@@ -232,38 +232,5 @@ public class OwnersSearchFRG extends Fragment implements InterfaceClickIFA, Upda
                 txvNotData.setVisibility(View.VISIBLE);
             }
         });
-
-        /*databaseReference.child("Usuarios").orderByChild("passeador").equalTo(true).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                if (dataSnapshot.exists()) {
-                    userWalkersModelList = new ArrayList<>();
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        UserModel user = postSnapshot.getValue(UserModel.class);
-                        if(userModel != null && !userModel.getEmail().equals(user.getEmail())) {
-                            userWalkersModelList.add(user);
-                        }
-                    }
-                    openFragment(OwnersSearchFRG.newInstance(userWalkersModelList));
-                    mProgressBar.setVisibility(View.GONE);
-                    //mOwnersFPA.setUsers(userWalkersModelList);
-                    //nViewPagerOwner.setAdapter(new OwnersFPA(getSupportFragmentManager (), etapas, userWalkersModelList));
-                    *//*userWalkersModelList = dataSnapshot.getChildren().iterator().next()
-                            .getValue(UserModel.class);*//*
-
-                }else{
-                    //Avisa que o e-mail é invalida!
-                    Toast.makeText(getApplicationContext(), "Nenhum passeador encontrado no momento!",
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(), "Erro na conexão! " + databaseError,
-                        Toast.LENGTH_SHORT).show();
-            }
-        });*/
     }
 }

@@ -8,28 +8,125 @@
     <string name="imagem_de_fundo">imagem de fundo</string>
     <string name="tela_de_cadastro">Novo Dono</string>
     <string name="botao_cadastrar">Cadastrar</string>
-    <string name="facebook_app_id">340627666623048</string> <string name="fb_login_protocol_scheme">fb340627666623048</string>
+    <string name="facebook_app_id">340627666623048</string>
+    <string name="fb_login_protocol_scheme">fb340627666623048</string>
 
     <string-array name="arr_sexo">
-        <item>--</item>
+        <item>Sexo</item>
         <item>Masculino</item>
         <item>Feminino</item>
     </string-array>
 
+    <string-array name="arr_genre_dog">
+        <item>Sexo</item>
+        <item>Macho</item>
+        <item>Fêmea</item>
+    </string-array>
+
     <string-array name="arr_breed">
-        <item>--</item>
-        <item>Raça 1</item>
-        <item>Raça 2</item>
+        <item>Raça --</item>
+        <item>Afegão Hound</item>
+        <item>Affenpinscher</item>
+        <item>Airedale Terrier</item>
+        <item>Akita</item>
+        <item>American Staffordshire Terrier</item>
+        <item>Basenji</item>
+        <item>Basset Hound</item>
+        <item>Beagle</item>
+        <item>Beagle Harrier</item>
+        <item>Bearded Collie</item>
+        <item>Bedlington Terrier</item>
+        <item>Bichon Frisé</item>
+        <item>Bloodhound</item>
+        <item>Bobtail</item>
+        <item>Boiadeiro Australiano</item>
+        <item>Boiadeiro Bernês</item>
+        <item>Border Collie</item>
+        <item>Border Terrier</item>
+        <item>Borzoi</item>
+        <item>Boston Terrier</item>
+        <item>Boxer</item>
+        <item>Buldogue Francês</item>
+        <item>Buldogue Inglês</item>
+        <item>Bull Terrier</item>
+        <item>Bulmastife</item>
+        <item>Cairn Terrier</item>
+        <item>Cane Corso</item>
+        <item>Cão de Água Português</item>
+        <item>Cão de Crista Chinês</item>
+        <item>Cavalier King Charles Spaniel</item>
+        <item>Chesapeake Bay Retriever</item>
+        <item>Chihuahua</item>
+        <item>Chow Chow</item>
+        <item>Cocker Spaniel Americano</item>
+        <item>Cocker Spaniel Inglês</item>
+        <item>Collie</item>
+        <item>Coton de Tuléar</item>
+        <item>Dachshund</item>
+        <item>Dálmata</item>
+        <item>Dandie Dinmont Terrier</item>
+        <item>Dobermann</item>
+        <item>Dogo Argentino</item>
+        <item>Dogue Alemão</item>
+        <item>Fila Brasileiro</item>
+        <item>Fox Terrier (Pelo Duro e Pelo Liso)</item>
+        <item>Foxhound Inglês</item>
+        <item>Galgo Escocês</item>
+        <item>Galgo Irlandês</item>
+        <item>Golden Retriever</item>
+        <item>Grande Boiadeiro Suiço</item>
+        <item>Greyhound</item>
+        <item>Grifo da Bélgica</item>
+        <item>Husky Siberiano</item>
+        <item>Jack Russell Terrier</item>
+        <item>King Charles</item>
+        <item>Komondor</item>
+        <item>Labradoodle</item>
+        <item>Labrador Retriever</item>
+        <item>Lakeland Terrier</item>
+        <item>Leonberger</item>
+        <item>Lhasa Apso</item>
+        <item>Lulu da Pomerânia</item>
+        <item>Malamute do Alasca</item>
+        <item>Maltês</item>
+        <item>Mastife</item>
+        <item>Mastim Napolitano</item>
+        <item>Mastim Tibetano</item>
+        <item>Norfolk Terrier</item>
+        <item>Norwich Terrier</item>
+        <item>Papillon</item>
+        <item>Pastor Alemão</item>
+        <item>Pastor Australiano</item>
+        <item>Pinscher Miniatura</item>
+        <item>Poodle</item>
+        <item>Pug</item>
+        <item>Rottweiler</item>
+        <item>Sem Raça Definida (SRD)</item>
+        <item>ShihTzu</item>
+        <item>Silky Terrier</item>
+        <item>Skye Terrier</item>
+        <item>Staffordshire Bull Terrier</item>
+        <item>Terra Nova</item>
+        <item>Terrier Escocês</item>
+        <item>Tosa</item>
+        <item>Weimaraner</item>
+        <item>Welsh Corgi (Cardigan)</item>
+        <item>Welsh Corgi (Pembroke)</item>
+        <item>West Highland White Terrier</item>
+        <item>Whippet</item>
+        <item>Whippet</item>
+        <item>Xoloitzcuintli</item>
+        <item>Yorkshire Terrier</item>
     </string-array>
 
     <string-array name="arr_castrated">
-        <item>--</item>
+        <item>Castrado</item>
         <item>Sim</item>
         <item>Não</item>
     </string-array>
 
     <string-array name="arr_type">
-        <item>--</item>
+        <item>Modo de trabalho</item>
         <item>Serei apenas o dono</item>
         <item>Serei apenas o passeador</item>
         <item>Serei dono e passeador</item>
@@ -53,5 +150,6 @@
 
     <string name="title_bottom_navigation_owners">Interessados</string>
     <string name="title_toolbar_profile">Perfil</string>
+    <string name="title_activity_maps">Map</string>
 
 </resources>

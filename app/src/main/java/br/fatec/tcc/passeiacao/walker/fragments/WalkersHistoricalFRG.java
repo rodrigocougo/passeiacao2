@@ -1,17 +1,21 @@
 package br.fatec.tcc.passeiacao.walker.fragments;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -25,10 +29,12 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import br.fatec.tcc.passeiacao.ProfileViewSelectedActivity;
 import br.fatec.tcc.passeiacao.R;
+import br.fatec.tcc.passeiacao.interfaces.InterfaceClickHistoricalFA;
 import br.fatec.tcc.passeiacao.interfaces.InterfaceClickIFA;
 import br.fatec.tcc.passeiacao.interfaces.UpdateFragmentSearchOwnersIFA;
 import br.fatec.tcc.passeiacao.model.ScheduledModel;
@@ -39,7 +45,7 @@ import br.fatec.tcc.passeiacao.walker.adapters.WalkersADP;
 import static aplicacao.passeiacao.IS_HISTORICAL;
 import static com.facebook.FacebookSdk.getApplicationContext;
 
-public class WalkersHistoricalFRG extends Fragment implements InterfaceClickIFA, UpdateFragmentSearchOwnersIFA {
+public class WalkersHistoricalFRG extends Fragment implements InterfaceClickIFA, UpdateFragmentSearchOwnersIFA, InterfaceClickHistoricalFA {
 
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseReference;
@@ -121,6 +127,7 @@ public class WalkersHistoricalFRG extends Fragment implements InterfaceClickIFA,
         llmCat.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_NONE);
         mRecyclerViewListWalkers.setLayoutManager(llmCat);
         mWalkersADP = new WalkersADP((ArrayList<Object>)(List<?>) userModelsTours, IS_HISTORICAL);
+        mWalkersADP.setInterfaceClickHistoricalFA(this);
         mRecyclerViewListWalkers.setAdapter(mWalkersADP);
         //mWalkersADP.setInterfaceClickScheduledWalkersFA(this);
         mProgressBar.setVisibility(View.GONE);
@@ -152,12 +159,12 @@ public class WalkersHistoricalFRG extends Fragment implements InterfaceClickIFA,
                         Intent intent = new Intent(getActivity(), ProfileViewSelectedActivity.class);
                         intent.putExtra("id_walker", userSelected.getId());
                         intent.putExtra("name", userSelected.getNome());
-                        intent.putExtra("rating", 4);
+                        intent.putExtra("rating", userSelected.getNote());
                         intent.putExtra("address", userSelected.getBairro());
                         intent.putExtra("birth", userSelected.getNasc());
-                        intent.putExtra("performed", 0);
-                        intent.putExtra("canceled", 0);
-                        intent.putExtra("image", userSelected.getNome());
+                        intent.putExtra("performed", userSelected.getConcluded());
+                        intent.putExtra("canceled", userSelected.getCanceled());
+                        intent.putExtra("image", userSelected.getImageAvatar());
                         startActivity(intent);
                     } else {
                         //Avisa que o e-mail é invalida!
@@ -178,6 +185,7 @@ public class WalkersHistoricalFRG extends Fragment implements InterfaceClickIFA,
     private void getScheduleds() {
         mProgressBar.setVisibility(View.VISIBLE);
         txvNotData.setVisibility(View.GONE);
+        mWalkersADP.removeAllScheduled();
         fbReferenceScheduleds.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -241,5 +249,95 @@ public class WalkersHistoricalFRG extends Fragment implements InterfaceClickIFA,
     @Override
     public void updateUsersWalkersIFA(List<UserModel> userOwners) {
         //userModelsOwners = userOwners;
+    }
+
+    @Override
+    public void onClickListenerHistoricalCard(Object selected) {
+
+    }
+
+    @Override
+    public void onClickListenerAssessment(final Object selected) {
+        // create an alert builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Avaliação");
+
+        // set the custom layout
+        final View customLayout = getLayoutInflater().inflate(R.layout.activity_assessment_send, null);
+        builder.setView(customLayout);
+
+        //add a button cancel
+        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                //Desloga usuario e fecha esta janela
+            }
+        });
+
+        // add a button
+        builder.setPositiveButton("Enviar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                final ScheduledModel mDataSetTemp = (ScheduledModel) selected;
+                // send data from the AlertDialog to the Activity
+                RatingBar rtbAssessmentUserSend = customLayout.findViewById(R.id.rtbAssessmentUserSend);
+                EditText edtMessageAssessmentSend = customLayout.findViewById(R.id.edtMessageAssessmentSend);
+                setHistorical(mDataSetTemp, Double.valueOf(rtbAssessmentUserSend.getRating()), edtMessageAssessmentSend.getText().toString());
+            }
+        });
+
+        // create and show the alert dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+    public void setHistorical(final ScheduledModel mDataSetTemp, final Double avaliation, final String message){
+        fbReferenceScheduleds.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                //scheduledModelList = new ArrayList<>();
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        final ScheduledModel scheduled = postSnapshot.getValue(ScheduledModel.class);
+                        //Salva o status de recebimento do convite
+                        if (scheduled.getId().equals(mDataSetTemp.getId().toString()) && scheduled.getInitiated_invitation()) {
+                            scheduled.setAssessment_note_owner(avaliation);
+                            scheduled.setAssessment_message_owner(message);
+                            scheduled.setAssessment_date_owner(String.valueOf(new Date()));
+                            postSnapshot.getRef().setValue(scheduled);
+                            setUserRatingMore(avaliation, scheduled.getId_owner());
+                            //mWalkersADP.removeRegisterScheduled(scheduled);
+
+                            //não exclui, apenas fecha a mensagem
+                            Toast.makeText(getApplicationContext(), "Avaliação enviada com sucesso!",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+    public void setUserRatingMore (final Double avaliation, String id_owner){
+        databaseReference.child("Usuarios").orderByChild("id").equalTo(id_owner).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        final UserModel userModel = snapshot.getValue(UserModel.class);
+                        userModel.setNote(userModel.getNote() + avaliation);
+                        snapshot.getRef().setValue(userModel);
+                        //userViewModel.addUser(userModel);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 }

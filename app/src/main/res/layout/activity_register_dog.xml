@@ -3,13 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     tools:context=".RegisterUserActivity"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:fillViewport="true">
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/img_cover_background"
@@ -29,24 +28,35 @@
 
     <ImageButton
         android:id="@+id/imbEditImageDog"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbarChooseRegisterDog"
-        app:srcCompat="@android:drawable/ic_menu_edit" />
+        android:background="@drawable/button_around"
+        android:elevation="2dp"
+        android:padding="2dp"
+        android:scaleType="centerCrop"
+        app:srcCompat="@android:drawable/ic_menu_camera" />
 
-    <ImageView
+    <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/imgCoverDog"
         android:layout_width="0dp"
         android:layout_height="170dp"
+        android:background="@color/colorBackground"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbarChooseRegisterDog"
         app:srcCompat="@drawable/img_photo_dog"
-        android:background="@color/colorBackground" />
+        fresco:fadeDuration="300"
+        fresco:roundAsCircle="true"
+        fresco:roundBottomEnd="false"
+        fresco:roundBottomStart="false"
+        fresco:roundingBorderColor="@color/colorLabelTitles"
+        fresco:roundingBorderWidth="3dp" />
 
     <EditText
         android:id="@+id/edtNameDog"
@@ -62,7 +72,6 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginRight="32dp"
-        android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
         android:hint="Nome"
         android:maxLength="30"
         app:layout_constraintEnd_toEndOf="parent"
@@ -98,8 +107,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginStart="32dp"
-        android:layout_marginLeft="32dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="32dp"
         android:layout_marginRight="32dp"
@@ -127,23 +136,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/spnBreedDog" />
 
-    <EditText
-        android:id="@+id/edtHeightDog"
-        android:layout_width="80dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/usuarioTextView"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentEnd="true"
+    <Spinner
+        android:id="@+id/spnGenreDog"
+        style="@android:style/Widget.Material.Spinner.Underlined"
+        android:layout_width="100dp"
+        android:layout_height="0dp"
         android:layout_alignParentRight="true"
-        android:layout_marginStart="32dp"
-        android:layout_marginLeft="32dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
         android:layout_marginTop="24dp"
         android:hint="Altura"
         android:inputType="numberDecimal"
         android:maxLength="5"
+        app:layout_constraintBottom_toBottomOf="@+id/edtWeightDog"
         app:layout_constraintStart_toEndOf="@+id/edtWeightDog"
-        app:layout_constraintTop_toBottomOf="@+id/spnBreedDog" />
+        app:layout_constraintTop_toBottomOf="@+id/spnBreedDog"
+        tools:targetApi="lollipop" />
 
     <Spinner
         android:id="@+id/spnCastrated"
@@ -151,14 +159,14 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_alignParentRight="true"
-        android:layout_marginStart="32dp"
-        android:layout_marginLeft="32dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="32dp"
         android:layout_marginRight="32dp"
-        app:layout_constraintBottom_toBottomOf="@+id/edtHeightDog"
+        app:layout_constraintBottom_toBottomOf="@+id/spnGenreDog"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/edtHeightDog"
+        app:layout_constraintStart_toEndOf="@+id/spnGenreDog"
         app:layout_constraintTop_toBottomOf="@+id/spnBreedDog"
         tools:targetApi="lollipop" />
 
@@ -176,11 +184,11 @@
         android:layout_marginTop="24dp"
         android:layout_marginEnd="32dp"
         android:layout_marginRight="32dp"
-        android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
         android:hint="Observações"
-        android:inputType="text"
+        android:inputType="textImeMultiLine"
         android:lines="3"
-        android:maxLength="256"
+        android:maxLines="3"
+        android:maxLength="128"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edtWeightDog" />

@@ -4,10 +4,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.media.Image;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.URLUtil;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.fatec.tcc.passeiacao.R;
+import br.fatec.tcc.passeiacao.interfaces.InterfaceClickHistoricalFA;
 import br.fatec.tcc.passeiacao.interfaces.InterfaceClickIFA;
 import br.fatec.tcc.passeiacao.interfaces.InterfaceClickScheduledWalkersFA;
 import br.fatec.tcc.passeiacao.model.DogModel;
@@ -37,6 +40,7 @@ public class WalkersADP extends RecyclerView.Adapter<br.fatec.tcc.passeiacao.wal
     private ArrayList<Object> mDataSet;
     private Integer vTipoInterface;
     private InterfaceClickScheduledWalkersFA mInterfaceClickScheduledWalkersFA;
+    private InterfaceClickHistoricalFA mInterfaceClickHistoricalFA;
     private Context context;
 
     public WalkersADP(ArrayList<Object> mDataSet, Integer vTipoInterface) {
@@ -76,22 +80,41 @@ public class WalkersADP extends RecyclerView.Adapter<br.fatec.tcc.passeiacao.wal
             ArrayList<ScheduledModel> mDataSetTemp = (ArrayList<ScheduledModel>) (List<?>) mDataSet;
             holder.lblTitleCardOwner.setText(mDataSetTemp.get(position).getTitle_walker());
             holder.lblSubTitleCardOwner.setText(mDataSetTemp.get(position).getAddress_owner());
+            if(URLUtil.isValidUrl(mDataSetTemp.get(position).getImage_owner())) {
+                holder.imgAvatarOwner.setImageURI(Uri.parse(mDataSetTemp.get(position).getImage_owner()));
+            }
         } else if (vTipoInterface == IS_SCHEDULED) {
             final ArrayList<ScheduledModel> mDataSetTemp = (ArrayList<ScheduledModel>) (List<?>) mDataSet;
             holder.lblTitleCardWalker.setText(mDataSetTemp.get(position).getTitle_walker());
             holder.lblSubTitleCardWalker.setText(mDataSetTemp.get(position).getAddress_walker());
             holder.imgIconWalkerCancel.setVisibility(View.GONE);
             holder.imgIconWalkerBegin.setVisibility(View.GONE);
+            holder.lblHighlighterOwnerScheduled.setVisibility(View.VISIBLE);
+            if(URLUtil.isValidUrl(mDataSetTemp.get(position).getImage_owner())) {
+                holder.imgAvatarWalker.setImageURI(Uri.parse(mDataSetTemp.get(position).getImage_owner()));
+            }
             if(mDataSetTemp.get(position).getInitiated_invitation()) {
                 holder.lblHighlighterOwnerScheduled.setText("Aguardando\nconfirmação");
                 if (mDataSetTemp.get(position).getConfirmed_initiated_invitation()) {
                     holder.lblHighlighterOwnerScheduled.setText("Passeio\nem andamento...");
+                } else {
+                    holder.lblHighlighterOwnerScheduled.setText("Aguardando\ninicio...");
                 }
                 if (mDataSetTemp.get(position).getDone_invitation()) {
                     holder.lblHighlighterOwnerScheduled.setText("Aguardando\nconfirmação");
                 }
                 if (mDataSetTemp.get(position).getConfirmed_done_invitation()) {
                     holder.lblHighlighterOwnerScheduled.setText("Passeio\nfinalizado");
+                    holder.lblLinkWalkerScheduled.setText("ENCERRAR");
+                    holder.lblLinkWalkerScheduled.setVisibility(View.VISIBLE);
+                    holder.lblLinkWalkerScheduled.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if(mInterfaceClickScheduledWalkersFA != null) {
+                                mInterfaceClickScheduledWalkersFA.onClickListenerScheduledClosed(mDataSetTemp.get(position));
+                            }
+                        }
+                    });
                 }
             }else if(mDataSetTemp.get(position).getCanceled_invitation()){
                 holder.lblHighlighterOwnerScheduled.setText("Passeio\ncancelado");
@@ -114,9 +137,35 @@ public class WalkersADP extends RecyclerView.Adapter<br.fatec.tcc.passeiacao.wal
             }
         } else if (vTipoInterface == IS_HISTORICAL) {
             ArrayList<ScheduledModel> mDataSetTemp = (ArrayList<ScheduledModel>) (List<?>) mDataSet;
-            holder.lblTitleCardOwnerHistory.setText(mDataSetTemp.get(position).getTitle_walker());
-            holder.lblSubTitleCardOwnerHistory.setText(mDataSetTemp.get(position).getAddress_walker());
-            holder.lblLink2OwnerHistory.setVisibility(View.GONE);
+            holder.lblTitleCardOwnerHistory.setText(mDataSetTemp.get(position).getTitle_owner());
+            holder.lblSubTitleCardOwnerHistory.setText(mDataSetTemp.get(position).getAddress_owner());
+            if(URLUtil.isValidUrl(mDataSetTemp.get(position).getImage_owner())) {
+                holder.imgAvatarOwnerHistory.setImageURI(Uri.parse(mDataSetTemp.get(position).getImage_owner()));
+            }
+            if(mDataSetTemp.get(position).getCanceled_invitation() == false) {
+                holder.lblLink2OwnerHistory.setVisibility(View.GONE);
+            }else{
+                holder.lblHighlighterOwnerScheduled.setText("Cancelado");
+                holder.lblHighlighterOwnerScheduled.setTextColor(Color.RED);
+                holder.lblHighlighterOwnerScheduled.setVisibility(View.VISIBLE);
+                holder.lblLinkOwnerHistory.setVisibility(View.INVISIBLE);
+                holder.lblLink2OwnerHistory.setVisibility(View.GONE);
+                return;
+            }
+            holder.lblLink2OwnerHistory.setVisibility(View.INVISIBLE);  //Contratar novamente
+            if(mDataSetTemp.get(position).getConfirmed_done_invitation() == true && mDataSetTemp.get(position).getAssessment_date_owner() == null) {
+                holder.lblHighlighterOwnerScheduled.setText("Finalizado\ncom sucesso");
+                holder.lblHighlighterOwnerScheduled.setTextColor(Color.GREEN);
+                holder.lblHighlighterOwnerScheduled.setVisibility(View.VISIBLE);
+                holder.lblLink2OwnerHistory.setVisibility(View.GONE);
+                holder.lblLinkOwnerHistory.setVisibility(View.VISIBLE);   //Avaliar
+            }else{
+                holder.lblHighlighterOwnerScheduled.setText("Já avaliado");
+                holder.lblHighlighterOwnerScheduled.setTextColor(Color.GREEN);
+                holder.lblHighlighterOwnerScheduled.setVisibility(View.VISIBLE);
+                holder.lblLink2OwnerHistory.setVisibility(View.GONE);
+                holder.lblLinkOwnerHistory.setVisibility(View.INVISIBLE);   //Já Avaliado
+            }
         }
     }
 
@@ -223,6 +272,17 @@ public class WalkersADP extends RecyclerView.Adapter<br.fatec.tcc.passeiacao.wal
                 lblSubTitleCardOwnerHistory = v.findViewById(R.id.lblSubTitleCardOwnerHistory);
                 lblLinkOwnerHistory = v.findViewById(R.id.lblLinkOwnerHistory);
                 lblLink2OwnerHistory = v.findViewById(R.id.lblLink2OwnerHistory);
+                lblHighlighterOwnerScheduled = v.findViewById(R.id.lblHighlighterOwnerScheduled);
+
+                lblLinkOwnerHistory.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(mInterfaceClickHistoricalFA != null) {
+                            ArrayList<ScheduledModel> mDataSetTemp = (ArrayList<ScheduledModel>)(List<?>) mDataSet;
+                            mInterfaceClickHistoricalFA.onClickListenerAssessment(mDataSetTemp.get(getPosition()));
+                        }
+                    }
+                });
 
                 /*cdvCardOwnerHistory.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -251,12 +311,15 @@ public class WalkersADP extends RecyclerView.Adapter<br.fatec.tcc.passeiacao.wal
     public void setInterfaceClickScheduledWalkersFA(InterfaceClickScheduledWalkersFA r) {
         mInterfaceClickScheduledWalkersFA = r;
     }
+    public void setInterfaceClickHistoricalFA (InterfaceClickHistoricalFA r){
+        mInterfaceClickHistoricalFA = r;
+    }
 
+    //Funções de add/remove/update no adaptador
     public void addRegister(Object mDataSet) {
         this.mDataSet.add((ScheduledModel) mDataSet);
         //notifyItemInserted(getItemCount());
     }
-
     public void addRegisterScheduled(Object item) {
         ArrayList<ScheduledModel> mDataSetTemp = (ArrayList<ScheduledModel>) (List<?>) mDataSet;
         ScheduledModel mDataSetTempItem = (ScheduledModel) item;
@@ -271,7 +334,6 @@ public class WalkersADP extends RecyclerView.Adapter<br.fatec.tcc.passeiacao.wal
         this.mDataSet.add((ScheduledModel) item);
         notifyItemInserted(getItemCount());
     }
-
     public void removeRegisterScheduled(Object item) {
         if (mDataSet == null) return;
         ArrayList<ScheduledModel> mDataSetTemp = (ArrayList<ScheduledModel>) (List<?>) mDataSet;
@@ -291,6 +353,9 @@ public class WalkersADP extends RecyclerView.Adapter<br.fatec.tcc.passeiacao.wal
                 return;
             }
         }
+    }
+    public void removeAllScheduled(){
+        mDataSet = new ArrayList<>();
     }
 
 }

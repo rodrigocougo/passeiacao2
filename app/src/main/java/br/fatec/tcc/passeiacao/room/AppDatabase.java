@@ -9,7 +9,7 @@ import androidx.room.RoomDatabase;
 import br.fatec.tcc.passeiacao.interfaces.UserModelDAO;
 import br.fatec.tcc.passeiacao.model.UserModel;
 
-@Database(entities = {UserModel.class}, version = 1, exportSchema = false)
+@Database(entities = {UserModel.class}, version = 2, exportSchema = false)
 
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -19,7 +19,7 @@ public abstract class AppDatabase extends RoomDatabase {
         if (INSTANCE == null) {
             INSTANCE =
                     Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "passeia_cao_sqlite_db")
-                            .build();
+                            .fallbackToDestructiveMigration () .build();
         }
         return INSTANCE;
     }

@@ -87,6 +87,7 @@ public class UserViewModel extends AndroidViewModel {
     /**************************************************************************************************/
     //Add User...
     public void addUser(final UserModel user) {
+        if(user == null) return;
         UserModel userModel = getUserEmail(user.getEmail());
         if(userModel != null){
             new UpdateUserViewModel(appDatabase,
@@ -108,6 +109,11 @@ public class UserViewModel extends AndroidViewModel {
                     user.getPasseador(),
                     user.getCanceled(),
                     user.getConcluded(),
+                    user.getNote(),
+                    user.getImageAvatar(),
+                    user.getImageCover(),
+                    user.getLatitude(),
+                    user.getLongitude(),
                     user.getId()).execute();
         }else{
             new AddUserViewModel(appDatabase).execute(user);
@@ -149,10 +155,15 @@ public class UserViewModel extends AndroidViewModel {
         private int Passeador;
         private int Canceleds;
         private int Concludeds;
+        private double Note;
+        private String Avatar;
+        private String Cover;
+        private double Latitude;
+        private double Longitude;
         private String IdUser;
 
         UpdateUserViewModel(AppDatabase appDatabase,
-                            String nome, String email, String telefone, String sexo, String usuario, String senha, String cpf, String nasc, String cep, String numero, String endereco, String complemento, String bairro, String cidade, Boolean dono, Boolean passeador, Integer canceleds, Integer concludeds, String idUser) {
+                            String nome, String email, String telefone, String sexo, String usuario, String senha, String cpf, String nasc, String cep, String numero, String endereco, String complemento, String bairro, String cidade, Boolean dono, Boolean passeador, Integer canceleds, Integer concludeds, Double note, String avatar, String cover, double latitude, double longitude, String idUser) {
             db = appDatabase;
             Nome = nome;
             Email = email;
@@ -172,12 +183,17 @@ public class UserViewModel extends AndroidViewModel {
             Passeador = passeador ? 1 : 0;
             Canceleds = canceleds;
             Concludeds = concludeds;
+            Note = note;
+            Avatar = avatar;
+            Cover = cover;
+            Latitude = latitude;
+            Longitude = longitude;
             IdUser = idUser;
         }
 
         @Override
         protected Void doInBackground(final UserModel... params) {
-            db.itemAndUserModel().updateUserOne(Nome, Email, Telefone, Sexo, Usuario, Senha, Cpf, Nasc, Cep, Numero, Endereco, Complemento, Bairro, Cidade, Dono, Passeador, Canceleds, Concludeds, IdUser);
+            db.itemAndUserModel().updateUserOne(Nome, Email, Telefone, Sexo, Usuario, Senha, Cpf, Nasc, Cep, Numero, Endereco, Complemento, Bairro, Cidade, Dono, Passeador, Canceleds, Concludeds, Note, Avatar, Cover, Latitude, Longitude, IdUser);
             return null;
         }
 

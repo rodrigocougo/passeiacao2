@@ -2,6 +2,8 @@ package br.fatec.tcc.passeiacao;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 
@@ -20,10 +22,13 @@ import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
+import android.webkit.URLUtil;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -51,7 +56,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -66,7 +73,7 @@ import static aplicacao.passeiacao.PASSEADOR;
 public class RegisterUserActivity extends AppCompatActivity {
 
     // request code
-    private final int PICK_IMAGE_REQUEST = 22;
+    private final int PICK_IMAGE_REQUEST_COVER = 1, PICK_IMAGE_REQUEST_AVATAR = 2;
     // Uri indicates, where the image will be picked from
     private Uri filePath;
     private int IMAGE_TYPE = 1; //1=COVER / 2=AVATAR
@@ -115,6 +122,14 @@ public class RegisterUserActivity extends AppCompatActivity {
     private UserModel userModel;
     private UserViewModel userViewModel;
 
+    private Uri mImageUri;
+    private StorageReference mStorageRef;
+    private DatabaseReference mDatabaseRef;
+    private StorageTask mUploadTask;
+
+    private final String mMsqInfo = "";
+    private ProgressDialog mDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,6 +163,8 @@ public class RegisterUserActivity extends AppCompatActivity {
 
         //Inicializa o FireBase
         inicializaFireBase();
+        mStorageRef = FirebaseStorage.getInstance().getReference("uploads");
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference("uploads");
 
         // Initialize Firebase Auth (utenticação padrão do Firebase)
         mAuth = FirebaseAuth.getInstance();
@@ -215,8 +232,6 @@ public class RegisterUserActivity extends AppCompatActivity {
 
                 //Realiza o INSERT no FIREBASE;
                 deleteUsuarioFireBase(userModel);
-
-
             }
         });
 
@@ -224,7 +239,8 @@ public class RegisterUserActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 IMAGE_TYPE = 1;
-                SelectImage();
+                openFileChooser(PICK_IMAGE_REQUEST_COVER);
+                //SelectImage();
             }
         });
 
@@ -329,7 +345,9 @@ public class RegisterUserActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 IMAGE_TYPE = 2;
-                SelectImage();
+                openFileChooser(PICK_IMAGE_REQUEST_AVATAR);
+                //uploadFile();
+                //SelectImage();
             }
         });
 
@@ -337,7 +355,8 @@ public class RegisterUserActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 IMAGE_TYPE = 1;
-                SelectImage();
+                openFileChooser(PICK_IMAGE_REQUEST_COVER);
+                //SelectImage();
             }
         });
 
@@ -458,16 +477,11 @@ public class RegisterUserActivity extends AppCompatActivity {
                 compl.trim(),
                 bairro.trim(),
                 cidade.trim(),
-                0.0,
-                0,
-                0,
-                "",
-                "",
+                this.userModel.getImageCover(),
+                this.userModel.getImageAvatar(),
                 false,
                 false,
                 false,
-                "",
-                "",
                 "",
                 ""
         );
@@ -566,6 +580,12 @@ public class RegisterUserActivity extends AppCompatActivity {
         bairroEditText.setText(userModel.getBairro().toString());
         cidadeEditText.setText(userModel.getCidade().toString());
         idTextView.setText(userModel.getId().toString());
+        if(URLUtil.isValidUrl(userModel.getImageAvatar())) {
+            imgAvatarRegisterUser.setImageURI(Uri.parse(userModel.getImageAvatar()));
+        }
+        if(URLUtil.isValidUrl(userModel.getImageCover())) {
+            imgCoverUser.setImageURI(Uri.parse(userModel.getImageCover()));
+        }
 
         //Carrega o spinner de genero
         final Spinner sexoSpinner = (Spinner) findViewById(R.id.sexoSpinner);
@@ -636,11 +656,12 @@ public class RegisterUserActivity extends AppCompatActivity {
         databaseReference.child("Usuarios").orderByChild("id").equalTo(id_user_firebase).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                for (final DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     snapshot.getRef().setValue(userModel);
+                    userViewModel.addUser(userModel);
                     Toast.makeText(getApplicationContext(), "Atualização realizada com sucesso",
                             Toast.LENGTH_SHORT).show();
-                    userViewModel.addUser(userModel);
+                    //userViewModel.addUser(userModel);
                     finish();
                 }
             }
@@ -684,172 +705,174 @@ public class RegisterUserActivity extends AppCompatActivity {
     }
 
     //    #############################################################################################
-//    android:digits="0123456789.-"
-    //Operações com imagens
-// Select Image method
-    private void SelectImage() {
-
-        // Defining Implicit Intent to mobile gallery
+    private void openFileChooser(Integer PICK_IMAGE_REQUEST) {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(
-                Intent.createChooser(
-                        intent,
-                        "Seleicone a imagem..."),
-                PICK_IMAGE_REQUEST);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
-
-    // Override onActivityResult method
     @Override
-    protected void onActivityResult(int requestCode,
-                                    int resultCode,
-                                    Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mDialog = new ProgressDialog(this);
+        mDialog.setTitle("Aguarde...");
+        mDialog.setMessage(mMsqInfo);
+        mDialog.setCancelable(true);
+        mDialog.show();
 
-        super.onActivityResult(requestCode,
-                resultCode,
-                data);
-
-        // checking request code and result code
-        // if request code is PICK_IMAGE_REQUEST and
-        // resultCode is RESULT_OK
-        // then set image in the image view
-        if (requestCode == PICK_IMAGE_REQUEST
-                && resultCode == RESULT_OK
-                && data != null
-                && data.getData() != null) {
-
-            // Get the Uri of data
-            filePath = data.getData();
-            try {
-                if (IMAGE_TYPE == 1) {
-                    // Setting image on image view using Bitmap
-                    Bitmap bitmap = MediaStore
-                            .Images
-                            .Media
-                            .getBitmap(
-                                    getContentResolver(),
-                                    filePath);
-                    imgCoverUser.setImageBitmap(bitmap);
-                } else if (IMAGE_TYPE == 2) {
-                    Bitmap bitmap = MediaStore
-                            .Images
-                            .Media
-                            .getBitmap(
-                                    getContentResolver(),
-                                    filePath);
-                    Bitmap circleBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-
-                    BitmapShader shader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-                    Paint paint = new Paint();
-                    paint.setShader(shader);
-                    paint.setAntiAlias(true);
-                    Canvas c = new Canvas(circleBitmap);
-                    c.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2, bitmap.getWidth() / 2, paint);
-                    //imgAvatarRegisterUser.setImageBitmap(bitmap);
-                    imgAvatarRegisterUser.setImageURI(filePath);
-                }
-
-            } catch (IOException e) {
-                // Log the exception
-                e.printStackTrace();
+        if (requestCode == PICK_IMAGE_REQUEST_AVATAR && resultCode == RESULT_OK
+                && data != null && data.getData() != null) {
+            mImageUri = data.getData();
+            //Picasso.get().load(mImageUri).into(imgAvatarRegisterUser);
+            imgAvatarRegisterUser.setImageURI(mImageUri);
+            if (mImageUri != null) {
+                StorageReference fileReference = mStorageRef.child(System.currentTimeMillis()
+                        + "." + getFileExtension(mImageUri));
+                mUploadTask = fileReference.putFile(mImageUri)
+                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                Handler handler = new Handler();
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        //mProgressBar.setProgress(0);
+                                        //Fecha o load
+                                        if ((mDialog != null) && ( mDialog.isShowing())){
+                                            mDialog.dismiss();
+                                            mDialog = null;
+                                        }
+                                    }
+                                }, 500);
+                                Task<Uri> urlTask = taskSnapshot.getStorage().getDownloadUrl();
+                                while (!urlTask.isSuccessful());
+                                Uri downloadUrl = urlTask.getResult();
+                                userModel.setImageAvatar(downloadUrl.toString());
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                //Fecha o load
+                                if ((mDialog != null) && ( mDialog.isShowing())){
+                                    mDialog.dismiss();
+                                    mDialog = null;
+                                }
+                                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+                                mDialog.setMessage(
+                                        "Carregando "
+                                                + (int)progress + "%");
+                                //mProgressBar.setProgress((int) progress);
+                            }
+                        });
+            }
+        }else if (requestCode == PICK_IMAGE_REQUEST_COVER && resultCode == RESULT_OK
+                && data != null && data.getData() != null) {
+            mImageUri = data.getData();
+            //Picasso.get().load(mImageUri).into(imgAvatarRegisterUser);
+            imgCoverUser.setImageURI(mImageUri);
+            if (mImageUri != null) {
+                StorageReference fileReference = mStorageRef.child(System.currentTimeMillis()
+                        + "." + getFileExtension(mImageUri));
+                mUploadTask = fileReference.putFile(mImageUri)
+                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                Handler handler = new Handler();
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        //Fecha o load
+                                        if ((mDialog != null) && ( mDialog.isShowing())){
+                                            mDialog.dismiss();
+                                            mDialog = null;
+                                        }
+                                    }
+                                }, 500);
+                                Task<Uri> urlTask = taskSnapshot.getStorage().getDownloadUrl();
+                                while (!urlTask.isSuccessful());
+                                Uri downloadUrl = urlTask.getResult();
+                                userModel.setImageCover(downloadUrl.toString());
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                //Fecha o load
+                                if ((mDialog != null) && ( mDialog.isShowing())){
+                                    mDialog.dismiss();
+                                    mDialog = null;
+                                }
+                                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+                                mDialog.setMessage(
+                                        "Carregando "
+                                                + (int)progress + "%");
+                                //mProgressBar.setProgress((int) progress);
+                            }
+                        });
+            }
+        } else {
+            //Fecha o load
+            if ((mDialog != null) && ( mDialog.isShowing())){
+                mDialog.dismiss();
+                mDialog = null;
             }
         }
     }
-
-    //metodo 2 upload firebase image
-    private void upLoadImageFirebase() {
-        imageButtonLoadCover.setDrawingCacheEnabled(true);
-        imageButtonLoadCover.buildDrawingCache();
-        Bitmap bitmap = ((BitmapDrawable) imageButtonLoadCover.getDrawable()).getBitmap();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] data = baos.toByteArray();
-
-        UploadTask uploadTask = null;//mountainsRef.putBytes(data);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle unsuccessful uploads
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                // ...
-            }
-        });
+    private String getFileExtension(Uri uri) {
+        ContentResolver cR = getContentResolver();
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        return mime.getExtensionFromMimeType(cR.getType(uri));
     }
-
-    // UploadImage method
-    private void uploadImage() {
-        if (filePath != null) {
-
-            // Code for showing progressDialog while uploading
-            ProgressDialog progressDialog
-                    = new ProgressDialog(this);
-            progressDialog.setTitle("Uploading...");
-            progressDialog.show();
-
-            // Defining the child of storageReference
-            StorageReference ref
-                    = storageReference
-                    .child(
-                            "images/"
-                                    + UUID.randomUUID().toString());
-
-            // adding listeners on upload
-            // or failure of image
-            ref.putFile(filePath)
-                    .addOnSuccessListener(
-                            new OnSuccessListener<UploadTask.TaskSnapshot>() {
-
+    private void uploadFile() {
+        if (mImageUri != null) {
+            StorageReference fileReference = mStorageRef.child(System.currentTimeMillis()
+                    + "." + getFileExtension(mImageUri));
+            mUploadTask = fileReference.putFile(mImageUri)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
                                 @Override
-                                public void onSuccess(
-                                        UploadTask.TaskSnapshot taskSnapshot) {
-
-                                    // Image uploaded successfully
-                                    // Dismiss dialog
-                                    //progressDialog.dismiss();
-                                    Toast
-                                            .makeText(getApplicationContext(),
-                                                    "Image Uploaded!!",
-                                                    Toast.LENGTH_SHORT)
-                                            .show();
+                                public void run() {
+                                    //mProgressBar.setProgress(0);
                                 }
-                            })
-
+                            }, 500);
+                            Toast.makeText(getApplicationContext(), "Upload successful", Toast.LENGTH_LONG).show();
+                            /*Upload upload = new Upload(mEditTextFileName.getText().toString().trim(),
+                                    taskSnapshot.getDownloadUrl().toString());*/
+                            String uploadId = mDatabaseRef.push().getKey();
+                            mDatabaseRef.child(uploadId).setValue(taskSnapshot.getUploadSessionUri().toString());
+                        }
+                    })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-
-                            // Error, Image not uploaded
-                            //progressDialog.dismiss();
-                            Toast
-                                    .makeText(getApplicationContext(),
-                                            "Failed " + e.getMessage(),
-                                            Toast.LENGTH_SHORT)
-                                    .show();
+                            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     })
-                    .addOnProgressListener(
-                            new OnProgressListener<UploadTask.TaskSnapshot>() {
-
-                                // Progress Listener for loading
-                                // percentage on the dialog box
-                                @Override
-                                public void onProgress(
-                                        UploadTask.TaskSnapshot taskSnapshot) {
-                                    double progress
-                                            = (100.0
-                                            * taskSnapshot.getBytesTransferred()
-                                            / taskSnapshot.getTotalByteCount());
-                                    /*progressDialog.setMessage(
-                                            "Uploaded "
-                                                    + (int)progress + "%");*/
-                                }
-                            });
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+                            //mProgressBar.setProgress((int) progress);
+                        }
+                    });
+        } else {
+            Toast.makeText(this, "No file selected", Toast.LENGTH_SHORT).show();
         }
     }
-
 }

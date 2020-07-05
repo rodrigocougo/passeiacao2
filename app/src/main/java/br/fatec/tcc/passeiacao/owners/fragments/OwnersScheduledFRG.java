@@ -1,6 +1,7 @@
 package br.fatec.tcc.passeiacao.owners.fragments;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,8 +28,11 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.Inflater;
 
+import br.fatec.tcc.passeiacao.MapsActivity;
 import br.fatec.tcc.passeiacao.R;
+import br.fatec.tcc.passeiacao.interfaces.InterfaceClickHistoricalFA;
 import br.fatec.tcc.passeiacao.interfaces.InterfaceClickScheduledFA;
 import br.fatec.tcc.passeiacao.model.ScheduledModel;
 import br.fatec.tcc.passeiacao.owners.adapters.OwnersADP;
@@ -103,7 +107,7 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
 
     private void getScheduleds() {
         mProgressBar.setVisibility(View.VISIBLE);
-        txvNotData.setVisibility(View.GONE);
+        txvNotData.setVisibility(View.INVISIBLE);
         fbReferenceScheduleds.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -123,29 +127,24 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
                                         scheduled.setTitle_walker(userModel.getNome());
                                         scheduled.setAddress_walker(userModel.getBairro());
                                     }
-                                    //scheduledModelList.add(scheduled);
                                     mOwnersADP.addRegisterScheduled(scheduled);
-                                    mProgressBar.setVisibility(View.GONE);
-                                    txvNotData.setVisibility(View.GONE);
-                                    //mOwnersADP.notifyDataSetChanged();
-                                    //openFragment(OwnersScheduledFRG.newInstance(scheduledModelList));
-                                    mRecyclerViewListScheduleds.setVisibility(View.VISIBLE);
                                 }
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                                    mProgressBar.setVisibility(View.INVISIBLE);
+                                    txvNotData.setVisibility(View.VISIBLE);
+                                    txvNotData.setText("Ops, falha na conexão!");
+                                    mRecyclerViewListScheduleds.setVisibility(View.VISIBLE);
                                 }
                             });
                             /*#######################################################################*/
-                        } else {
-                            mProgressBar.setVisibility(View.GONE);
-                            mRecyclerViewListScheduleds.setVisibility(View.VISIBLE);
-                            txvNotData.setVisibility(View.VISIBLE);
                         }
                     }
+                    mProgressBar.setVisibility(View.INVISIBLE);
+                    mRecyclerViewListScheduleds.setVisibility(View.VISIBLE);
                 } else {
-                    mProgressBar.setVisibility(View.GONE);
+                    mProgressBar.setVisibility(View.INVISIBLE);
                     txvNotData.setVisibility(View.VISIBLE);
                     mRecyclerViewListScheduleds.setVisibility(View.VISIBLE);
                 }
@@ -156,23 +155,22 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
                 Toast.makeText(getApplicationContext(), "Erro na conexão! " + databaseError,
                         Toast.LENGTH_SHORT).show();
                 //openFragment(OwnersScheduledFRG.newInstance(new ArrayList<ScheduledModel>()));
-                mProgressBar.setVisibility(View.GONE);
+                mProgressBar.setVisibility(View.INVISIBLE);
                 txvNotData.setVisibility(View.VISIBLE);
             }
         });
     }
 
-
     //Processo universal de cancelamento dos agendamentos
     @Override
-    public void onClickListenerScheduledCANCEL(final Object selected) {
+    public void onClickListenerScheduledCANCEL(final Object selected, final Boolean countMore) {
         new AlertDialog.Builder(getContext())
-                .setTitle("Você realmente deseja cancelar este passeio?")
-                .setMessage("Ao cancelar este passeio, será\n" +
+                .setTitle("Você realmente deseja cancelar este interesse?")
+                /*.setMessage("Ao cancelar este passeio, será\n" +
                         "enviado uma notificação ao \n" +
                         "passeador, e será marcado em seu\n" +
                         "perfil um cancelamento de \n" +
-                        "serviço.")
+                        "serviço.")*/
                 .setPositiveButton("Não", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         //Desloga usuario e fecha esta janela
@@ -182,7 +180,9 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
                     public void onClick(DialogInterface dialog, int which) {
                         final ScheduledModel mDataSetTemp = (ScheduledModel) selected;
                         setCanceledInvitation(mDataSetTemp);
-                        setCanceledUserCountMore();
+                        if(countMore == true){
+                            setCanceledUserCountMore();
+                        }
                         getScheduleds();
                     }
                 })
@@ -256,9 +256,17 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
                 .show();
     }
 
+    @Override
+    public void onClickListenerLocationMap(Object selected) {
+        ScheduledModel scheduledModel = (ScheduledModel) selected;
+        Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+        intent.putExtra("id_walker", scheduledModel.getId_walker());
+        startActivity(intent);
+    }
+
     //Operações Firebase
     private void setConfirmedInitiationInvitation(final ScheduledModel mDataSetTemp) {
-        fbReferenceScheduleds.addValueEventListener(new ValueEventListener() {
+        fbReferenceScheduleds.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 //scheduledModelList = new ArrayList<>();
@@ -272,10 +280,10 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
                             //mWalkersADP.removeRegisterScheduled(scheduled);
 
                             //não exclui, apenas fecha a mensagem
-                            Toast.makeText(getApplicationContext(), "Passeio liberado para \n" +
+                            /*Toast.makeText(getApplicationContext(), "Passeio liberado para \n" +
                                             "ser iniciado pelo dono do \n" +
                                             "passeio!",
-                                    Toast.LENGTH_SHORT).show();
+                                    Toast.LENGTH_SHORT).show();*/
                         }
                     }
                 }
@@ -289,7 +297,7 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
     }
 
     private void setCanceledInvitation(final ScheduledModel mDataSetTemp) {
-        fbReferenceScheduleds.addValueEventListener(new ValueEventListener() {
+        fbReferenceScheduleds.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 //scheduledModelList = new ArrayList<>();
@@ -340,7 +348,7 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
         });
     }
 
-    private void setConcludedUserCountMore(String id_walker) {
+    private void setConcludedUserCountMore(final String id_walker) {
         databaseReference.child("Usuarios").orderByChild("id").equalTo(idUserFirebase).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -348,7 +356,8 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         final UserModel userModel = snapshot.getValue(UserModel.class);
                         userModel.setConcluded(userModel.getConcluded() + 1);
-                        dataSnapshot.getRef().setValue(userModel);
+                        snapshot.getRef().setValue(userModel);
+                        userViewModel.addUser(userModel);
                     }
                 }
             }
@@ -362,12 +371,11 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    if (dataSnapshot.exists()) {
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            final UserModel userModel = snapshot.getValue(UserModel.class);
-                            userModel.setCanceled(userModel.getCanceled() + 1);
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        final UserModel userModel = snapshot.getValue(UserModel.class);
+                        if(userModel.getId().equals(id_walker)){
                             userModel.setConcluded(userModel.getConcluded() + 1);
-                            dataSnapshot.getRef().setValue(userModel);
+                            snapshot.getRef().setValue(userModel);
                         }
                     }
                 }
@@ -381,7 +389,7 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
     }
 
     private void setConfirmedDone(final ScheduledModel mDataSetTemp) {
-        fbReferenceScheduleds.addValueEventListener(new ValueEventListener() {
+        fbReferenceScheduleds.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 //scheduledModelList = new ArrayList<>();
@@ -412,7 +420,7 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
     }
 
     private void setConfirmedClosed(final ScheduledModel mDataSetTemp) {
-        fbReferenceScheduleds.addValueEventListener(new ValueEventListener() {
+        fbReferenceScheduleds.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 //scheduledModelList = new ArrayList<>();

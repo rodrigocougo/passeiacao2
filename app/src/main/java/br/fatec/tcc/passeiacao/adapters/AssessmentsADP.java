@@ -1,9 +1,11 @@
 package br.fatec.tcc.passeiacao.adapters;
 
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.URLUtil;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -18,6 +20,7 @@ import java.util.List;
 import br.fatec.tcc.passeiacao.R;
 import br.fatec.tcc.passeiacao.model.AssessmentsModel;
 import br.fatec.tcc.passeiacao.interfaces.InterfaceClickIFA;
+import br.fatec.tcc.passeiacao.model.AssessmentsModel;
 
 public class AssessmentsADP extends RecyclerView.Adapter<AssessmentsADP.ViewHolder> {
 
@@ -51,9 +54,12 @@ public class AssessmentsADP extends RecyclerView.Adapter<AssessmentsADP.ViewHold
             Log.d("OwnersSearchFRG", "CHEGOU 2a");
             ArrayList<AssessmentsModel> mDataSetTemp = (ArrayList<AssessmentsModel>)(List<?>) mDataSetAssessments;
             holder.lblTitleCardAssessments.setText(mDataSetTemp.get(position).getTitle());
-            //holder.rtbProfileAssessment.setText(mDataSetTemp.get(position).getRatingBar());
+            holder.rtbProfileAssessment.setRating((float) mDataSetTemp.get(position).getRatingBar());
             holder.lblCommentsItem.setText(mDataSetTemp.get(position).getComment());
             holder.lblDateAssessments.setText(mDataSetTemp.get(position).getCreateAt());
+            if(URLUtil.isValidUrl(mDataSetTemp.get(position).getImage())) {
+                holder.imgAvatarAssessments.setImageURI(Uri.parse(mDataSetTemp.get(position).getImage()));
+            }
         }else if(vTipoInterface == 2) {
         }
     }
@@ -79,6 +85,7 @@ public class AssessmentsADP extends RecyclerView.Adapter<AssessmentsADP.ViewHold
                 lblCommentsItem = v.findViewById(R.id.lblCommentsItem);
                 lblDateAssessments = v.findViewById(R.id.lblDateAssessments);
                 cdvAssessments = v.findViewById(R.id.cdvAssessments);
+                imgAvatarAssessments = v.findViewById(R.id.imgAvatarAssessments);
                 cdvAssessments.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -91,5 +98,20 @@ public class AssessmentsADP extends RecyclerView.Adapter<AssessmentsADP.ViewHold
 
             }
         }
+    }
+
+    public void addRegisterAssessment (Object item){
+        ArrayList<AssessmentsModel> mDataSetTemp = (ArrayList<AssessmentsModel>)(List<?>) mDataSetAssessments;
+        AssessmentsModel mDataSetTempItem = (AssessmentsModel) item;
+        for(int x=0; x<mDataSetTemp.size(); x++){
+            if(mDataSetTemp.get(x).getId_assessment().equals(mDataSetTempItem.getId_assessment())){
+                mDataSetTemp.get(x).updateModel(mDataSetTempItem.modelGet());
+                this.mDataSetAssessments.set(x, (AssessmentsModel) mDataSetTemp.get(x));
+                notifyItemChanged(x);
+                return;
+            }
+        }
+        this.mDataSetAssessments.add((AssessmentsModel) item);
+        notifyItemInserted(getItemCount());
     }
 }

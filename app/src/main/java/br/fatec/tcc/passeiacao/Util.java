@@ -7,12 +7,25 @@ import android.util.Base64;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import br.fatec.tcc.passeiacao.model.ScheduledModel;
+import br.fatec.tcc.passeiacao.model.UserModel;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
 
@@ -310,6 +323,89 @@ public abstract class Util {
         }
 
         return idade;
+    }
+
+    public static double getCalcNotes(List<Integer> notes){
+        int cont1=0, cont2=0, cont3=0, cont4=0, cont5=0;
+        double noteFinal = 0;
+        try {
+            for (int note :
+                    notes) {
+                switch (note) {
+                    case 1:
+                        cont1++;
+                        break;
+                    case 2:
+                        cont2++;
+                        break;
+                    case 3:
+                        cont3++;
+                        break;
+                    case 4:
+                        cont4++;
+                        break;
+                    case 5:
+                        cont5++;
+                        break;
+                }
+            }
+            double multNotas = ((1 * cont1) + (2 * cont2) + (3 * cont3) + (4 * cont4) + (5 * cont5));
+            double somaNotas = (cont1 + cont2 + cont3 + cont4 + cont5);
+            noteFinal = multNotas / somaNotas;
+        } catch (Exception e) {
+            noteFinal = 0;
+        }
+        return noteFinal;
+    }
+
+    public static void getScheduledsCalcAssessments(Query fbReferenceScheduleds, final DatabaseReference databaseReference, final String id_user) {
+        fbReferenceScheduleds.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                //scheduledModelList = new ArrayList<>();
+                if (dataSnapshot.exists()) {
+                    List<Integer> notes = new ArrayList<>();
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        final ScheduledModel scheduled = postSnapshot.getValue(ScheduledModel.class);
+                        if (scheduled.getAssessment_date_walker() != "") {
+                            //Calcula a nota do usuario atual;
+                            int valor = (int)scheduled.getAssessment_note_walker();
+                            if(valor > 0){
+                                notes.add(valor);
+                            }
+
+                        }
+                    }
+                    final double noteFinal = Util.getCalcNotes(notes);
+                    /*#######################################################################*/
+                    databaseReference.child("Usuarios").orderByChild("id").equalTo(id_user).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                for (final DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                    UserModel userModel = dataSnapshot.getChildren().iterator().next()
+                                            .getValue(UserModel.class);
+                                    userModel.setNote(noteFinal);
+                                    snapshot.getRef().setValue(userModel);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                    /*#######################################################################*/
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), "Erro na conexão! " + databaseError,
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }

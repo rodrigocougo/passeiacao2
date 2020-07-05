@@ -59,7 +59,12 @@ public interface UserModelDAO {
             "Dono = :Dono," +
             "Passeador = :Passeador," +
             "Canceled = :Canceleds," +
-            "Concluded = :Concludeds" +
+            "Concluded = :Concludeds," +
+            "Note = :Note, " +
+            "ImageCover = :Cover," +
+            "ImageAvatar = :Avatar," +
+            "Latitude = :Latitude," +
+            "Longitude = :Longitude" +
             " where Email = :Email")
     void updateUserOne(
             String Nome,
@@ -80,6 +85,11 @@ public interface UserModelDAO {
             Integer Passeador,
             Integer Canceleds,
             Integer Concludeds,
+            Double Note,
+            String Avatar,
+            String Cover,
+            double Latitude,
+            double Longitude,
             String IdUser);
 
 

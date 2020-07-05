@@ -25,6 +25,15 @@ public class ScheduledModel {
     private String title_owner;
     private String address_owner;
 
+    /* Avaliação do usuario */
+    private double assessment_note_walker = 0;
+    private String assessment_message_walker;
+    private String assessment_date_walker;
+
+    private double assessment_note_owner = 0;
+    private String assessment_message_owner;
+    private String assessment_date_owner;
+
     public ScheduledModel() {
     }
 
@@ -43,7 +52,7 @@ public class ScheduledModel {
     }
 */
 
-    public ScheduledModel(String id, String id_owner, String id_walker, Boolean send_invitation, Boolean received_invitation, Boolean confirmed_invitation, Boolean initiated_invitation, Boolean confirmed_initiated_invitation, Boolean done_invitation, Boolean confirmed_done_invitation, Boolean confirmed_done_closed_walker, Boolean confirmed_done_closed_owner, Boolean canceled_invitation) {
+    /*public ScheduledModel(String id, String id_owner, String id_walker, Boolean send_invitation, Boolean received_invitation, Boolean confirmed_invitation, Boolean initiated_invitation, Boolean confirmed_initiated_invitation, Boolean done_invitation, Boolean confirmed_done_invitation, Boolean confirmed_done_closed_walker, Boolean confirmed_done_closed_owner, Boolean canceled_invitation) {
         this.id = id;
         this.id_owner = id_owner;
         this.id_walker = id_walker;
@@ -57,6 +66,28 @@ public class ScheduledModel {
         this.confirmed_done_closed_walker = confirmed_done_closed_walker;
         this.confirmed_done_closed_owner = confirmed_done_closed_owner;
         this.canceled_invitation = canceled_invitation;
+    }*/
+
+    public ScheduledModel(String id, String id_owner, String id_walker, Boolean send_invitation, Boolean received_invitation, Boolean confirmed_invitation, Boolean initiated_invitation, Boolean confirmed_initiated_invitation, Boolean done_invitation, Boolean confirmed_done_invitation, Boolean confirmed_done_closed_walker, Boolean confirmed_done_closed_owner, Boolean canceled_invitation, double assessment_note_walker, String assessment_message_walker, String assessment_date_walker, double assessment_note_owner, String assessment_message_owner, String assessment_date_owner) {
+        this.id = id;
+        this.id_owner = id_owner;
+        this.id_walker = id_walker;
+        this.send_invitation = send_invitation;
+        this.received_invitation = received_invitation;
+        this.confirmed_invitation = confirmed_invitation;
+        this.initiated_invitation = initiated_invitation;
+        this.confirmed_initiated_invitation = confirmed_initiated_invitation;
+        this.done_invitation = done_invitation;
+        this.confirmed_done_invitation = confirmed_done_invitation;
+        this.confirmed_done_closed_walker = confirmed_done_closed_walker;
+        this.confirmed_done_closed_owner = confirmed_done_closed_owner;
+        this.canceled_invitation = canceled_invitation;
+        this.assessment_note_walker = assessment_note_walker;
+        this.assessment_message_walker = assessment_message_walker;
+        this.assessment_date_walker = assessment_date_walker;
+        this.assessment_note_owner = assessment_note_owner;
+        this.assessment_message_owner = assessment_message_owner;
+        this.assessment_date_owner = assessment_date_owner;
     }
 
     public String getId() {
@@ -211,6 +242,54 @@ public class ScheduledModel {
         this.confirmed_done_closed_owner = confirmed_done_closed_owner;
     }
 
+    public double getAssessment_note_walker() {
+        return assessment_note_walker;
+    }
+
+    public void setAssessment_note_walker(double assessment_note_walker) {
+        this.assessment_note_walker = assessment_note_walker;
+    }
+
+    public String getAssessment_message_walker() {
+        return assessment_message_walker;
+    }
+
+    public void setAssessment_message_walker(String assessment_message_walker) {
+        this.assessment_message_walker = assessment_message_walker;
+    }
+
+    public String getAssessment_date_walker() {
+        return assessment_date_walker;
+    }
+
+    public void setAssessment_date_walker(String assessment_date_walker) {
+        this.assessment_date_walker = assessment_date_walker;
+    }
+
+    public double getAssessment_note_owner() {
+        return assessment_note_owner;
+    }
+
+    public void setAssessment_note_owner(double assessment_note_owner) {
+        this.assessment_note_owner = assessment_note_owner;
+    }
+
+    public String getAssessment_message_owner() {
+        return assessment_message_owner;
+    }
+
+    public void setAssessment_message_owner(String assessment_message_owner) {
+        this.assessment_message_owner = assessment_message_owner;
+    }
+
+    public String getAssessment_date_owner() {
+        return assessment_date_owner;
+    }
+
+    public void setAssessment_date_owner(String assessment_date_owner) {
+        this.assessment_date_owner = assessment_date_owner;
+    }
+
     public ScheduledModel modelGet (){
         return new ScheduledModel(
                 getId(),
@@ -223,9 +302,15 @@ public class ScheduledModel {
                 getConfirmed_initiated_invitation(),
                 getDone_invitation(),
                 getConfirmed_done_invitation(),
-                getCanceled_invitation(),
+                getConfirmed_done_closed_walker(),
                 getConfirmed_done_closed_owner(),
-                getConfirmed_done_closed_walker()
+                getCanceled_invitation(),
+                getAssessment_note_walker(),
+                getAssessment_message_walker(),
+                getAssessment_date_walker(),
+                getAssessment_note_owner(),
+                getAssessment_message_owner(),
+                getAssessment_date_owner()
         );
     }
     public void updateModel (ScheduledModel scheduledModel){
@@ -239,8 +324,14 @@ public class ScheduledModel {
         this.setInitiated_invitation(scheduledModel.getInitiated_invitation());
         this.setDone_invitation(scheduledModel.getDone_invitation());
         this.setConfirmed_done_invitation(scheduledModel.getConfirmed_done_invitation());
-        this.setCanceled_invitation(scheduledModel.getCanceled_invitation());
-        this.setConfirmed_done_closed_owner(scheduledModel.getConfirmed_done_closed_owner());
         this.setConfirmed_done_closed_walker(scheduledModel.getConfirmed_done_closed_walker());
+        this.setConfirmed_done_closed_owner(scheduledModel.getConfirmed_done_closed_owner());
+        this.setCanceled_invitation(scheduledModel.getCanceled_invitation());
+        this.setAssessment_note_walker(scheduledModel.getAssessment_note_walker());
+        this.setAssessment_message_walker(scheduledModel.getAssessment_message_walker());
+        this.setAssessment_date_walker(scheduledModel.getAssessment_date_walker());
+        this.setAssessment_note_owner(scheduledModel.getAssessment_note_owner());
+        this.setAssessment_message_owner(scheduledModel.getAssessment_message_owner());
+        this.setAssessment_date_owner(scheduledModel.getAssessment_date_owner());
     }
 }

@@ -216,10 +216,10 @@ public class WalkersSearchFRG extends Fragment implements InterfaceClickSchedule
                                 }
                             });
                             /*#######################################################################*/
-                        } else {
+                        /*} else {
                             mWalkersADP.removeRegisterScheduled(scheduled);
                             mProgressBar.setVisibility(View.GONE);
-                            txvNotData.setVisibility(View.VISIBLE);
+                            txvNotData.setVisibility(View.VISIBLE);*/
                         }
                     }
                 } else {
@@ -254,12 +254,12 @@ public class WalkersSearchFRG extends Fragment implements InterfaceClickSchedule
                         Intent intent = new Intent(getActivity(), ProfileViewSelectedActivity.class);
                         intent.putExtra("id_walker", userSelected.getId());
                         intent.putExtra("name", userSelected.getNome());
-                        intent.putExtra("rating", 4);
+                        intent.putExtra("rating", userSelected.getNote());
                         intent.putExtra("address", userSelected.getBairro());
                         intent.putExtra("birth", userSelected.getNasc());
-                        intent.putExtra("performed", 0);
-                        intent.putExtra("canceled", 0);
-                        intent.putExtra("image", userSelected.getNome());
+                        intent.putExtra("performed", userSelected.getConcluded());
+                        intent.putExtra("canceled", userSelected.getCanceled());
+                        intent.putExtra("image", userSelected.getImageAvatar());
                         startActivity(intent);
                     } else {
                         //Avisa que o e-mail é invalida!
@@ -300,12 +300,12 @@ public class WalkersSearchFRG extends Fragment implements InterfaceClickSchedule
     @Override
     public void onClickListenerScheduledDenied(final Object selected) {
         new AlertDialog.Builder(getContext())
-                .setTitle("Você realmente deseja cancelar este passeio?")
-                .setMessage("Ao cancelar este passeio, será\n" +
+                .setTitle("Você realmente deseja recusar este interesse?")
+                /*.setMessage("Ao cancelar este passeio, será\n" +
                         "enviado uma notificação ao \n" +
                         "dono, e será marcado em seu\n" +
                         "perfil um cancelamento de \n" +
-                        "serviço.")
+                        "serviço.")*/
                 .setPositiveButton("Não", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         //Desloga usuario e fecha esta janela
@@ -315,7 +315,7 @@ public class WalkersSearchFRG extends Fragment implements InterfaceClickSchedule
                     public void onClick(DialogInterface dialog, int which) {
                         final ScheduledModel mDataSetTemp = (ScheduledModel) selected;
                         setCanceledInvitation(mDataSetTemp);
-                        setCanceledUserCountMore();
+                        //setCanceledUserCountMore();
                     }
                 })
                 .show();
@@ -323,7 +323,22 @@ public class WalkersSearchFRG extends Fragment implements InterfaceClickSchedule
 
     @Override
     public void onClickListenerScheduledCard(Object selected) {
+        databaseReference.child("Usuarios").orderByChild("id").equalTo(((ScheduledModel) selected).getId_owner()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        final UserModel userModel = snapshot.getValue(UserModel.class);
+                        getOwnerEmail (userModel);
+                    }
+                }
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
@@ -339,7 +354,7 @@ public class WalkersSearchFRG extends Fragment implements InterfaceClickSchedule
     //Operações Firebase
     private void setConfirmedInvation (ScheduledModel selected){
         final ScheduledModel mDataSetTemp = (ScheduledModel) selected;
-        fbReferenceScheduleds.addValueEventListener(new ValueEventListener() {
+        fbReferenceScheduleds.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 //scheduledModelList = new ArrayList<>();
@@ -364,7 +379,7 @@ public class WalkersSearchFRG extends Fragment implements InterfaceClickSchedule
     }
     private void setCanceledInvitation (ScheduledModel selected){
         final ScheduledModel mDataSetTemp = (ScheduledModel) selected;
-        fbReferenceScheduleds.addValueEventListener(new ValueEventListener() {
+        fbReferenceScheduleds.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 //scheduledModelList = new ArrayList<>();
@@ -374,6 +389,7 @@ public class WalkersSearchFRG extends Fragment implements InterfaceClickSchedule
                         //Salva o status de recebimento do convite
                         if (scheduled.getId().equals(mDataSetTemp.getId().toString())) {
                             scheduled.setCanceled_invitation(true);
+                            scheduled.setConfirmed_done_closed_walker(true);
                             postSnapshot.getRef().setValue(scheduled);
                             mWalkersADP.removeRegisterScheduled(scheduled);
                         }
@@ -406,5 +422,42 @@ public class WalkersSearchFRG extends Fragment implements InterfaceClickSchedule
 
             }
         });
+    }
+    public void getOwnerEmail (final UserModel userSelected) {
+        //Primeiro valida o EMAIL solicitado;
+        if(userSelected != null) {
+            databaseReference.child("Usuarios").orderByChild("email").equalTo(userSelected.getEmail()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                    if (dataSnapshot.exists()) {
+                        UserModel userModel = dataSnapshot.getChildren().iterator().next()
+                                .getValue(UserModel.class);
+                        Intent intent = new Intent(getActivity(), ProfileViewSelectedActivity.class);
+                        intent.putExtra("id_walker", userSelected.getId());
+                        intent.putExtra("name", userSelected.getNome());
+                        intent.putExtra("note", userSelected.getNote());
+                        intent.putExtra("rating", userSelected.getNoteUserConverter());
+                        intent.putExtra("address", userSelected.getBairro());
+                        intent.putExtra("birth", userSelected.getNascConvertAge());
+                        intent.putExtra("performed", userSelected.getConcluded());
+                        intent.putExtra("canceled", userSelected.getCanceled());
+                        intent.putExtra("image", userSelected.getImageAvatar());
+                        intent.putExtra("is_invitation", false);
+                        startActivity(intent);
+                    } else {
+                        //Avisa que o e-mail é invalida!
+                        Toast.makeText(getApplicationContext(), "E-mail invalido ou não encontrado!",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Toast.makeText(getApplicationContext(), "Erro na conexão! " + databaseError,
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 }
