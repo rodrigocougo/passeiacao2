@@ -315,7 +315,7 @@ public class ScheduledModel {
     }
     public void updateModel (ScheduledModel scheduledModel){
         this.setId(scheduledModel.getId());
-        this.setId_owner(scheduledModel.getId());
+        this.setId_owner(scheduledModel.getId_owner());
         this.setId_walker(scheduledModel.getId_walker());
         this.setSend_invitation(scheduledModel.getSend_invitation());
         this.setReceived_invitation(scheduledModel.getReceived_invitation());

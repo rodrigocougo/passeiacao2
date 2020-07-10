@@ -435,15 +435,15 @@ public class RegisterDogActivity extends AppCompatActivity {
             }
         });
     }
-//    #############################################################################################
-//    android:digits="0123456789.-"
-//    #############################################################################################
+    //    #############################################################################################
+    //    android:digits="0123456789.-"
+    //    #############################################################################################
     private void openFileChooser(Integer PICK_IMAGE_REQUEST) {
-    Intent intent = new Intent();
-    intent.setType("image/*");
-    intent.setAction(Intent.ACTION_GET_CONTENT);
-    startActivityForResult(intent, PICK_IMAGE_REQUEST);
-}
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

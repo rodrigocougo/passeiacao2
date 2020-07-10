@@ -145,7 +145,11 @@ public class WalkersScheduledFRG extends Fragment implements InterfaceClickSched
                                         scheduled.setAddress_walker(userModel.getBairro());
                                     }
                                     //scheduledModelList.add(scheduled);
-                                    mWalkersADP.addRegisterScheduled(scheduled);
+                                    if(scheduled.getCanceled_invitation()){
+                                        mWalkersADP.removeRegisterScheduled(scheduled);
+                                    } else {
+                                        mWalkersADP.addRegisterScheduled(scheduled);
+                                    }
                                     mProgressBar.setVisibility(View.GONE);
                                     txvNotData.setVisibility(View.GONE);
                                     //mWalkersADP.notifyDataSetChanged();
@@ -517,11 +521,52 @@ public class WalkersScheduledFRG extends Fragment implements InterfaceClickSched
                         if (scheduled.getId().equals(mDataSetTemp.getId().toString()) && scheduled.getInitiated_invitation()) {
                             scheduled.setConfirmed_done_closed_walker(true);
                             postSnapshot.getRef().setValue(scheduled);
+                            if(scheduled.getConfirmed_done_closed_owner() && !scheduled.getCanceled_invitation()) {
+                                setConcludedUserCountMore(mDataSetTemp.getId_owner());
+                            }
                             mWalkersADP.removeRegisterScheduled(scheduled);
                             mWalkersADP.notifyDataSetChanged();
                             //não exclui, apenas fecha a mensagem
                             Toast.makeText(getApplicationContext(), "Agendamento movido para o histórico com sucesso!",
                                     Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+    private void setConcludedUserCountMore(final String id_owner) {
+        databaseReference.child("Usuarios").orderByChild("id").equalTo(id_user_auth).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        final UserModel userModel = snapshot.getValue(UserModel.class);
+                        userModel.setConcluded(userModel.getConcluded() + 1);
+                        snapshot.getRef().setValue(userModel);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        databaseReference.child("Usuarios").orderByChild("id").equalTo(id_owner).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        final UserModel userModel = snapshot.getValue(UserModel.class);
+                        if(userModel.getId().equals(id_owner)){
+                            userModel.setConcluded(userModel.getConcluded() + 1);
+                            snapshot.getRef().setValue(userModel);
                         }
                     }
                 }

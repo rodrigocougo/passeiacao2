@@ -111,6 +111,18 @@
                     app:layout_constraintTop_toBottomOf="@+id/lblSubTitleProfile" />
 
                 <TextView
+                    android:id="@+id/lblContact"
+                    style="@style/LabelProfileMenuExtra"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginRight="16dp"
+                    android:text="Contato: "
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/lblSubTitleProfile"
+                    app:layout_constraintTop_toBottomOf="@+id/lblObservation" />
+
+                <TextView
                     android:id="@+id/lblAge"
                     style="@style/LabelProfileMenuExtra"
                     android:layout_width="0dp"
@@ -129,18 +141,21 @@
                     style="@style/LabelProfileMenuExtra"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
                     android:layout_marginBottom="8dp"
                     android:gravity="center"
                     android:text="337 realizados"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="@+id/imageView2"
-                    app:layout_constraintStart_toStartOf="@+id/lblObservation" />
+                    app:layout_constraintStart_toStartOf="@+id/lblObservation"
+                    app:layout_constraintTop_toBottomOf="@+id/lblContact" />
 
                 <TextView
                     android:id="@+id/lblCanceled"
                     style="@style/LabelProfileMenuExtra"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
                     android:layout_marginEnd="32dp"
                     android:layout_marginRight="32dp"
                     android:layout_marginBottom="8dp"
@@ -148,7 +163,8 @@
                     android:text="15 cancelados"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="@+id/imageView2"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/lblContact" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

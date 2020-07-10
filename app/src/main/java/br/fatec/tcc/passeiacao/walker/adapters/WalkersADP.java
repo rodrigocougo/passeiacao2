@@ -145,7 +145,7 @@ public class WalkersADP extends RecyclerView.Adapter<br.fatec.tcc.passeiacao.wal
             if(mDataSetTemp.get(position).getCanceled_invitation() == false) {
                 holder.lblLink2OwnerHistory.setVisibility(View.GONE);
             }else{
-                holder.lblHighlighterOwnerScheduled.setText("Cancelado");
+                holder.lblHighlighterOwnerScheduled.setText("Recusado");
                 holder.lblHighlighterOwnerScheduled.setTextColor(Color.RED);
                 holder.lblHighlighterOwnerScheduled.setVisibility(View.VISIBLE);
                 holder.lblLinkOwnerHistory.setVisibility(View.INVISIBLE);

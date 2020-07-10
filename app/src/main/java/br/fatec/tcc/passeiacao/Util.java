@@ -355,7 +355,7 @@ public abstract class Util {
         } catch (Exception e) {
             noteFinal = 0;
         }
-        return noteFinal;
+        return !Double.isNaN(noteFinal) ? noteFinal : 0.0;
     }
 
     public static void getScheduledsCalcAssessments(Query fbReferenceScheduleds, final DatabaseReference databaseReference, final String id_user) {

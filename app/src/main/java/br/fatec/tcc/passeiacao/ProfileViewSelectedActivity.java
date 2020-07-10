@@ -80,6 +80,8 @@ public class ProfileViewSelectedActivity extends AppCompatActivity implements In
     public OwnersDogsListFRG fragmentSelcetedDogs;
     public RecyclerView rcv_list_assessments;
     public Boolean is_invitation = true;
+    public Boolean is_owner = true;
+    public String contact = "";
 
     private Boolean flagActive = false;
 
@@ -130,6 +132,8 @@ public class ProfileViewSelectedActivity extends AppCompatActivity implements In
         Integer canceled = bundle.getInt("canceled");
         final String image = bundle.getString("image");
         is_invitation = bundle.getBoolean("is_invitation", true);
+        is_owner = bundle.getBoolean("is_owner", true);
+        contact = bundle.getString("contact", "");
 
         ImageView imageView3 = findViewById(R.id.imageView3);
         if(URLUtil.isValidUrl(image)) {
@@ -142,6 +146,7 @@ public class ProfileViewSelectedActivity extends AppCompatActivity implements In
         TextView lblAge = findViewById(R.id.lblAge);
         TextView lblPerformed = findViewById(R.id.lblPerformed);
         TextView lblCanceled = findViewById(R.id.lblCanceled);
+        TextView lblContact = findViewById(R.id.lblContact);
         btnInterestedYes = findViewById(R.id.btnInterestedYes);
 
         //imageView3.setImageDrawable(null);
@@ -152,6 +157,7 @@ public class ProfileViewSelectedActivity extends AppCompatActivity implements In
         lblAge.setText(birth + " anos");
         lblPerformed.setText(performed.toString() + " realizados");
         lblCanceled.setText(canceled.toString() + " cancelados");
+        lblContact.setText("Contato: " + contact);
 
         if(!is_invitation){
             btnInterestedYes.setVisibility(View.INVISIBLE);
@@ -197,7 +203,11 @@ public class ProfileViewSelectedActivity extends AppCompatActivity implements In
                 userModelAuth = muserModel;
                 if(userModelAuth == null) return;
                 ScheduledActive();
-                fbReferenceScheduleds = FirebaseDatabase.getInstance().getReference().child("Scheduleds").orderByChild("id_walker").equalTo(id_walker);
+                if(is_owner) {
+                    fbReferenceScheduleds = FirebaseDatabase.getInstance().getReference().child("Scheduleds").orderByChild("id_walker").equalTo(id_walker);
+                } else {
+                    fbReferenceScheduleds = FirebaseDatabase.getInstance().getReference().child("Scheduleds").orderByChild("id_owner").equalTo(id_walker);
+                }
                 getScheduledsAssessments(userModelAuth.getId());
                 fbReferenceDogs = FirebaseDatabase.getInstance().getReference().child("Dogs").orderByChild("id_user").equalTo(userModelAuth.getId());
                 //getDogUser();
@@ -338,14 +348,14 @@ public class ProfileViewSelectedActivity extends AppCompatActivity implements In
                         btnInterestedYes.setVisibility(View.VISIBLE);
                         btnInterestedYes.setText("CANCELAR INTERESSE");
                     }else if(!is_invitation) {
-                        btnInterestedYes.setVisibility(View.INVISIBLE);
+                        btnInterestedYes.setVisibility(View.GONE);
                     }else{
                         btnInterestedYes.setVisibility(View.VISIBLE);
                         btnInterestedYes.setText("TENHO INTERESSE");
                     }
                 }else{
                     if(!is_invitation) {
-                        btnInterestedYes.setVisibility(View.INVISIBLE);
+                        btnInterestedYes.setVisibility(View.GONE);
                     } else {
                         btnInterestedYes.setVisibility(View.VISIBLE);
                         btnInterestedYes.setText("TENHO INTERESSE");
@@ -370,17 +380,32 @@ public class ProfileViewSelectedActivity extends AppCompatActivity implements In
                     Integer x = 1;
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         final ScheduledModel scheduled = postSnapshot.getValue(ScheduledModel.class);
-                        if(scheduled.getAssessment_date_owner() != null){
-                            AssessmentsModel assessmentsModel = new AssessmentsModel(
-                                    scheduled.getId(),
-                                    scheduled.getId_owner(),
-                                    "",
-                                    scheduled.getTitle_owner(),
-                                    scheduled.getAssessment_note_owner(),
-                                    scheduled.getAssessment_message_owner(),
-                                    scheduled.getAssessment_date_owner()
-                            );
-                            mAssessmentsADP.addRegisterAssessment(assessmentsModel);
+                        if(is_owner) {  //mensagens do dono!
+                            if (scheduled.getAssessment_date_owner() != null) {
+                                AssessmentsModel assessmentsModel = new AssessmentsModel(
+                                        scheduled.getId(),
+                                        scheduled.getId_owner(),
+                                        "",
+                                        scheduled.getTitle_owner(),
+                                        scheduled.getAssessment_note_walker(),
+                                        scheduled.getAssessment_message_walker(),
+                                        scheduled.getAssessment_date_owner()
+                                );
+                                mAssessmentsADP.addRegisterAssessment(assessmentsModel);
+                            }
+                        }else{
+                            if (scheduled.getAssessment_date_walker() != null) {
+                                AssessmentsModel assessmentsModel = new AssessmentsModel(
+                                        scheduled.getId(),
+                                        scheduled.getId_walker(),
+                                        "",
+                                        scheduled.getTitle_walker(),
+                                        scheduled.getAssessment_note_owner(),
+                                        scheduled.getAssessment_message_owner(),
+                                        scheduled.getAssessment_date_walker()
+                                );
+                                mAssessmentsADP.addRegisterAssessment(assessmentsModel);
+                            }
                         }
                         x++;
                     }

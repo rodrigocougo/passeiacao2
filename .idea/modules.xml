@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/PasseiaCao2.0.iml" filepath="$PROJECT_DIR$/PasseiaCao2.0.iml" group="PasseiaCao2.0" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="PasseiaCao2.0/app" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="passeiacao2/app" />
+      <module fileurl="file://$PROJECT_DIR$/passeiacao2.iml" filepath="$PROJECT_DIR$/passeiacao2.iml" group="passeiacao2" />
     </modules>
   </component>
 </project>

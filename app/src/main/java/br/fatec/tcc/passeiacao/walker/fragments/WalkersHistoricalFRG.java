@@ -165,6 +165,7 @@ public class WalkersHistoricalFRG extends Fragment implements InterfaceClickIFA,
                         intent.putExtra("performed", userSelected.getConcluded());
                         intent.putExtra("canceled", userSelected.getCanceled());
                         intent.putExtra("image", userSelected.getImageAvatar());
+                        intent.putExtra("contact", userSelected.getTelefone());
                         startActivity(intent);
                     } else {
                         //Avisa que o e-mail é invalida!

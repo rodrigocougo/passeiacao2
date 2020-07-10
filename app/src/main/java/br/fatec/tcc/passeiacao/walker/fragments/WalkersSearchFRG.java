@@ -260,6 +260,7 @@ public class WalkersSearchFRG extends Fragment implements InterfaceClickSchedule
                         intent.putExtra("performed", userSelected.getConcluded());
                         intent.putExtra("canceled", userSelected.getCanceled());
                         intent.putExtra("image", userSelected.getImageAvatar());
+                        intent.putExtra("contact", userSelected.getTelefone());
                         startActivity(intent);
                     } else {
                         //Avisa que o e-mail é invalida!
@@ -323,7 +324,9 @@ public class WalkersSearchFRG extends Fragment implements InterfaceClickSchedule
 
     @Override
     public void onClickListenerScheduledCard(Object selected) {
-        databaseReference.child("Usuarios").orderByChild("id").equalTo(((ScheduledModel) selected).getId_owner()).addListenerForSingleValueEvent(new ValueEventListener() {
+        ScheduledModel scheduledModel = ((ScheduledModel) selected);
+        String id = String.valueOf(scheduledModel.getId_owner());
+        databaseReference.child("Usuarios").orderByChild("id").equalTo(id).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -444,6 +447,8 @@ public class WalkersSearchFRG extends Fragment implements InterfaceClickSchedule
                         intent.putExtra("canceled", userSelected.getCanceled());
                         intent.putExtra("image", userSelected.getImageAvatar());
                         intent.putExtra("is_invitation", false);
+                        intent.putExtra("is_owner", false);
+                        intent.putExtra("contact", userSelected.getTelefone());
                         startActivity(intent);
                     } else {
                         //Avisa que o e-mail é invalida!

@@ -215,7 +215,7 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
 
             }if(mDataSetTemp.get(position).getCanceled_invitation() == true && mDataSetTemp.get(position).getConfirmed_done_invitation() == false){           //Cancelado
                 holder.lblLinkOwnerScheduled.setVisibility(View.VISIBLE);
-                holder.lblHighlighterOwnerScheduled.setText("●  Cancelado");
+                holder.lblHighlighterOwnerScheduled.setText("●  Recusado");
                 holder.lblHighlighterOwnerScheduled.setTextColor(Color.RED);
                 holder.lblLinkOwnerScheduled.setText("ENCERRAR");
                 holder.lblLinkOwnerScheduled.setVisibility(View.VISIBLE);
@@ -241,7 +241,7 @@ public class OwnersADP extends RecyclerView.Adapter<OwnersADP.ViewHolder> {
             if(mDataSetTemp.get(position).getCanceled_invitation() == false) {
                 holder.lblLink2OwnerHistory.setVisibility(View.GONE);
             }else{
-                holder.lblHighlighterOwnerScheduled.setText("Cancelado");
+                holder.lblHighlighterOwnerScheduled.setText("Recusado");
                 holder.lblHighlighterOwnerScheduled.setTextColor(Color.RED);
                 holder.lblHighlighterOwnerScheduled.setVisibility(View.VISIBLE);
                 holder.lblLinkOwnerHistory.setVisibility(View.INVISIBLE);

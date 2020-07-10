@@ -127,7 +127,11 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
                                         scheduled.setTitle_walker(userModel.getNome());
                                         scheduled.setAddress_walker(userModel.getBairro());
                                     }
-                                    mOwnersADP.addRegisterScheduled(scheduled);
+                                    if(scheduled.getCanceled_invitation()){
+                                        mOwnersADP.removeRegisterScheduled(scheduled);
+                                    } else {
+                                        mOwnersADP.addRegisterScheduled(scheduled);
+                                    }
                                 }
 
                                 @Override
@@ -401,7 +405,6 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
                             scheduled.setDone_invitation(true);
                             scheduled.setConfirmed_done_invitation(true);
                             postSnapshot.getRef().setValue(scheduled);
-                            setConcludedUserCountMore(mDataSetTemp.getId_walker());
                             //mWalkersADP.removeRegisterScheduled(scheduled);
 
                             //não exclui, apenas fecha a mensagem
@@ -431,6 +434,9 @@ public class OwnersScheduledFRG extends Fragment implements InterfaceClickSchedu
                         if (scheduled.getId().equals(mDataSetTemp.getId().toString())) {
                             scheduled.setConfirmed_done_closed_owner(true);
                             postSnapshot.getRef().setValue(scheduled);
+                            if(scheduled.getConfirmed_done_closed_walker() && !scheduled.getCanceled_invitation()) {
+                                setConcludedUserCountMore(mDataSetTemp.getId_walker());
+                            }
                             mOwnersADP.removeRegisterScheduled(scheduled);
                             mOwnersADP.notifyDataSetChanged();
 

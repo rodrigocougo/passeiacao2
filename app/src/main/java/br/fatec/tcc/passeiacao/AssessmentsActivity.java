@@ -151,8 +151,8 @@ public class AssessmentsActivity extends AppCompatActivity {
                                         scheduled.getId_walker(),
                                         "",
                                         scheduled.getTitle_walker(),
-                                        scheduled.getAssessment_note_walker(),
-                                        scheduled.getAssessment_message_walker(),
+                                        scheduled.getAssessment_note_owner(),
+                                        scheduled.getAssessment_message_owner(),
                                         scheduled.getAssessment_date_walker()
                                 );
                             }else if(tipo == IS_WALKER){
@@ -161,8 +161,8 @@ public class AssessmentsActivity extends AppCompatActivity {
                                         scheduled.getId_owner(),
                                         "",
                                         scheduled.getTitle_owner(),
-                                        scheduled.getAssessment_note_owner(),
-                                        scheduled.getAssessment_message_owner(),
+                                        scheduled.getAssessment_note_walker(),
+                                        scheduled.getAssessment_message_walker(),
                                         scheduled.getAssessment_date_owner()
                                 );
                             }
